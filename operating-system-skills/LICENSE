@@ -1,0 +1,20 @@
+Copyright © 2026 Brody. All rights reserved.
+
+The Brody Operating System skill pack — its structure, instructions, prompts,
+templates, and documentation — is the original work of Brody. It is licensed,
+not sold.
+
+You may:
+  - Use these skills to run your own business.
+  - Adapt them for your own internal use.
+
+You may not:
+  - Resell, sublicense, or redistribute this pack, in whole or in part,
+    without written permission from Brody.
+  - Remove this notice.
+
+Third-party software: some skills deploy or orchestrate open-source software
+(for example an MCP server or a team-sharing backend). That software is NOT part
+of this pack and is NOT covered by this license; it remains under its own
+upstream license. This pack only tells your agent how to stand up and drive
+those tools — it does not include or relicense their code.
