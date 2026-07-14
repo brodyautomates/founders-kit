@@ -18,4 +18,4 @@ Drop `skills/` into your agent's skills directory (Claude Code: `~/.claude/skill
 
 ## License
 
-© 2026 Brody Glanville. All rights reserved. Licensed, not sold, see `LICENSE`. Two skills build on or install third-party open-source tools, which keep their own upstream licenses, see `THIRD-PARTY-NOTICES.md`.
+© 2026 Brody Automates. All rights reserved. Licensed, not sold, see `LICENSE`. Two skills build on or install third-party open-source tools, which keep their own upstream licenses, see `THIRD-PARTY-NOTICES.md`.

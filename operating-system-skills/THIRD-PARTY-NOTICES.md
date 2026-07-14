@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-The Brody Operating System is Brody Glanville's original work, covered by `LICENSE`. It uses and references some third-party open-source software, which keeps its own upstream licenses. None of it is sold as Brody's own.
+The Brody Operating System is Brody Automates's original work, covered by `LICENSE`. It uses and references some third-party open-source software, which keeps its own upstream licenses. None of it is sold as Brody's own.
 
 ## `os-mcp` (the MCP server)
 

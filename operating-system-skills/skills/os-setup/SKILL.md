@@ -2,7 +2,7 @@
 name: os-setup
 description: Stand up The Brody Operating System vault from an empty folder and run personalized onboarding. Builds every directory, writes the system files, Obsidian config, memory system, hooks, and output styles, then interviews the user to fill it in. Two modes: Solopreneurs/Professionals (default) and Business/Teams. Trigger it when the user says "set up", "bootstrap", "initialize", "onboarding", or runs /os-setup.
 ---
-<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+<!-- © 2026 Brody Automates. All rights reserved. The Brody Operating System. -->
 
 # The Brody Operating System: Setup + Onboarding
 

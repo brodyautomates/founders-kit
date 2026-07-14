@@ -2,7 +2,7 @@
 name: os-operator
 description: Build and schedule a personalized Operator prompt that keeps the user's second brain current on a recurring cadence. Run it from inside the vault folder locally. It reads `Context/` and `CLAUDE.md` first to work out the org, team, brand voice, and paths, then asks only the gaps it cannot read for itself (cadence, connectors, DM recipient, budgets, signature). It fills `references/operator-prompt-template.md`, saves the rendered prompt locally, then calls the `schedule` skill to wire the recurring trigger for you. The template is a generic version of a proven vault Operator spec: cadence awareness, freshness, daily-as-state, idle-timeout protection, principles, hard rules, failure handling, report schema. Use when the user says "set up the operator", "build my operator prompt", "operate my second brain", "schedule my OS", "os operator", "vault operator", or runs /os-operator.
 ---
-<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+<!-- © 2026 Brody Automates. All rights reserved. The Brody Operating System. -->
 
 # OS Operator
 

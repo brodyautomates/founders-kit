@@ -2,7 +2,7 @@
 name: os-optimizer
 description: "Framework-driven audit and optimizer for any markdown vault. Runs 9 frameworks (F1 Anthropic CLAUDE.md, F2 Karpathy Wiki, F3 Caveman, F4 Chroma Context Rot, F5 Anthropic Memory, F6 Progressive Disclosure, G7 Hygiene, F8 Reflection / Anthropic Dreams, F9 Architecture & Discoverability). F9 walks the real co-worker-Claude discovery chain (root CLAUDE.md → routing → folder Plot.md → file), checks the routing table against what the folders actually hold, builds or refreshes per-folder Plot.md indexes, catches files nothing can navigate to, and proposes structural reorganizations grounded in the user's Context/. Every finding ships a concrete fix. Nothing is flag-only, nothing waits for later. The user chooses apply-now (walked per item) or save-to-plan per finding. Visible per-stage tasks get created via TaskCreate so the user watches the run happen. TRIGGERS: os optimizer, optimize vault, vault audit, second brain audit, clean up vault, framework audit, discoverability check, architecture audit, reorg vault. Run from vault root."
 ---
-<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+<!-- © 2026 Brody Automates. All rights reserved. The Brody Operating System. -->
 
 # Vault Optimizer
 

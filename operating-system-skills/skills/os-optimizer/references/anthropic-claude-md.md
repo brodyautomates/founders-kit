@@ -1,4 +1,4 @@
-<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+<!-- © 2026 Brody Automates. All rights reserved. The Brody Operating System. -->
 
 # Anthropic — CLAUDE.md best practices
 

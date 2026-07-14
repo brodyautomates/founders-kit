@@ -2,7 +2,7 @@
 name: os-mcp
 description: Deploys the Brody OS MCP server to the user's own Railway account so Claude can read and write their Obsidian vault over the Relay.md sync protocol. The full server source ships inside the skill, so there is nothing to clone. The user pastes one Railway account token. The vault and its folders are discovered automatically after they sign in with OAuth. Use when the user wants to "set up the os MCP", "deploy relay MCP to Railway", "self-host the Obsidian MCP server", or "give Claude access to my Obsidian vault".
 ---
-<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+<!-- © 2026 Brody Automates. All rights reserved. The Brody Operating System. -->
 
 # OS MCP, Railway Deploy
 

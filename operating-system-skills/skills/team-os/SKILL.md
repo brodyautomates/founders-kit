@@ -3,7 +3,7 @@ name: team-os
 description: Turn an Obsidian vault into a shared Team OS by installing the upstream open-source Relay plugin (by System3, https://system3.md) and configuring it for team-wide sharing with roles and access control (RBAC). Relay is a third-party tool under its own license, installed by the user from Obsidian's community plugin store. Use when the user wants to "set up team os", "share a vault with my team", "add roles and access control to Obsidian", "set up shared and private folders", or "give teammates read or write access to a vault".
 ---
 
-<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+<!-- © 2026 Brody Automates. All rights reserved. The Brody Operating System. -->
 
 # Team OS: Shared Vault with Roles and Access Control
 

@@ -3,7 +3,7 @@
   "description": "Turn any folder into a working AI operating system: a persistent context layer plus agents that stand it up, run it, optimize it, share it across a team, and reach it from anywhere. Ships /os-setup, /os-operator, /os-optimizer, /team-os, and /os-mcp. Solo or team.",
   "version": "1.0.0",
   "author": {
-    "name": "Brody Glanville"
+    "name": "Brody Automates"
   },
   "license": "SEE LICENSE FILE"
 }
