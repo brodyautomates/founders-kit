@@ -5,7 +5,7 @@ skill: newsletter-writer
 
 # Example Edition
 
-<!-- Paste a newsletter edition you liked below. It can be your own or someone else's. -->
+<!-- Paste a newsletter edition you liked below. It can be yours or someone else's. -->
 
 ## Subject Line
 
@@ -17,4 +17,4 @@ skill: newsletter-writer
 
 ## Why It's Good
 
-<!-- Explain what makes this edition effective. Examples: "Great subject line — made me open immediately", "Perfect length for a weekly read", "The personal anecdote in the intro makes it feel human". -->
+<!-- What makes this edition effective? For example: "Great subject line, made me open it immediately", "Perfect length for a weekly read", "The personal anecdote in the intro makes it feel human". -->

@@ -1,15 +1,17 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # F3 — Caveman Compression (pass implementation)
 
 **Reference (the why):** `references/caveman-compression.md`.
-**Applies to:** the instruction layer — every `root-claude`, `folder-claude`, `claude-rules`, `skill` (SKILL.md), and every `.md` inside any `references/` folder of a skill. NOT applied to: notes, dailies, meetings, transcripts, decisions, context (human-facing knowledge layer).
+**Applies to:** the instruction layer — every `root-claude`, `folder-claude`, `claude-rules`, `skill` (SKILL.md), and every `.md` inside any `references/` folder of a skill. NOT applied to: notes, dailies, meetings, transcripts, decisions, context (the human-facing knowledge layer).
 
 ## How this pass works
 
-Agentic. **Crucial for caveman**: the trigger heuristic alone produces a flood of false positives because words like `just`, `really`, `simply` often do real work in context ("Just run X" — contrasting with "run all of them"). The agent reads each candidate **in its surrounding sentence** and judges whether the word is filler or load-bearing.
+Agentic. **This matters most for caveman**: the trigger heuristic on its own throws a flood of false positives, because words like `just`, `really`, `simply` often do real work in context ("Just run X" contrasts with "run all of them"). The agent reads each candidate **inside its surrounding sentence** and judges whether the word is filler or load-bearing.
 
-Findings include `reasoning` explaining why this specific occurrence is filler in this specific sentence. Without that judgment, this pass would be useless.
+Findings carry `reasoning` explaining why this specific occurrence is filler in this specific sentence. Without that judgment, the pass would be useless.
 
-Before any check runs, the orchestrator strips **protected zones** so the agent isn't reasoning about code/URLs/paths/wikilinks. See list at the bottom.
+Before any check runs, the orchestrator strips **protected zones** so the agent is not reasoning about code, URLs, paths, or wikilinks. See the list at the bottom.
 
 ## Contents
 
@@ -28,7 +30,7 @@ Before any check runs, the orchestrator strips **protected zones** so the agent 
 
 ## F3.1 — Filler density
 
-**Framework rule:** `just`, `really`, `basically`, `simply`, `please`, `actually`, `definitely`, `literally`, `very`, `quite` typically add no information.
+**Framework rule:** `just`, `really`, `basically`, `simply`, `please`, `actually`, `definitely`, `literally`, `very`, `quite` usually add no information.
 
 **Trigger heuristic:** count occurrences (after stripping protected zones):
 ```
@@ -47,13 +49,13 @@ Compute density per 100 words.
 | actually | "It's actually fine" | "Does X actually run? (vs. is supposed to)" |
 | literally | "Literally just delete it" | "Literally as in the L-flag, not figurative" |
 
-The rule of thumb: if removing the word changes nothing operationally, it's filler. If it carries contrast, emphasis on truth-value, or technical precision, it's load-bearing.
+The rule of thumb: if removing the word changes nothing operationally, it is filler. If it carries contrast, emphasis on truth-value, or technical precision, it is load-bearing.
 
 Each finding flags ONE specific occurrence (or aggregates a small batch of clearly-filler ones in the same file with reasoning). The reasoning quotes the sentence and explains why this `just` is filler.
 
 **False positives to skip:**
 - Quoted speech (someone else's words inside backticks or block quotes).
-- Cases where the word is doing technical/contrastive work.
+- Cases where the word is doing technical or contrastive work.
 - Code samples (already protected).
 
 **Severity:** warn (one finding per genuinely filler occurrence; cap at 25 per file with "…and N more flagged in JSON sidecar").
@@ -67,7 +69,7 @@ Suggested edit: "{sentence with the word removed/replaced}"
 Citation: caveman-compression.md → Compression rules
 ```
 
-**Auto-fix:** **fixable on user opt-in per file** — the agent applies the substitutions only to the occurrences it confirmed (not to all regex hits).
+**Auto-fix:** **fixable on user opt-in per file** — the agent applies the substitutions only to the occurrences it confirmed, not to every regex hit.
 
 ---
 
@@ -81,16 +83,16 @@ Citation: caveman-compression.md → Compression rules
 ```
 
 **Agent judgment:** for each candidate, read the surrounding sentence:
-- "I think X is best" → unhedge to "X is best" (or whatever the load-bearing claim is). Flag.
-- "It might be that the API rate-limits us" → genuine uncertainty about a fact. Skip; this is honest hedging about external behavior.
-- "Maybe we should check the logs" — depends: in a procedural CLAUDE.md/SKILL.md it's a hedge; in narrative notes, it's discussion.
+- "I think X is best" → unhedge to "X is best" (or whatever the load-bearing claim is). Flag it.
+- "It might be that the API rate-limits us" → genuine uncertainty about a fact. Skip it; this is honest hedging about external behavior.
+- "Maybe we should check the logs" — it depends: in a procedural CLAUDE.md/SKILL.md it is a hedge; in narrative notes it is discussion.
 
-The judgment line: in **instruction-layer** files (which this pass applies to), hedging weakens the instruction. In narrative/discussion (which this pass excludes), hedging is honest.
+The judgment line: in **instruction-layer** files (which this pass applies to), hedging weakens the instruction. In narrative or discussion writing (which this pass excludes), hedging is honest.
 
 **False positives to skip:**
 - Honest factual uncertainty about external systems.
-- Quoted user/conversation content.
-- Section that discusses *when* to hedge (meta).
+- Quoted user or conversation content.
+- A section that discusses *when* to hedge (meta).
 
 **Severity:** warn.
 
@@ -117,9 +119,9 @@ Suggested edit: "{imperative version}"
 Plus closures: `\b(hope (this|that) helps|let me know if you (need|have)|happy to (help|elaborate|clarify))\b`.
 
 **Agent judgment:** for each candidate, read the line and the next 1–2 lines.
-- Is it a literal preamble that says nothing operational? → flag. ("Let me explain how this works." → delete; the next line presumably explains it.)
-- Is it part of a quoted conversation? → skip.
-- Is it inside a `<details>` or quote block preserving an example? → skip.
+- Is it a literal preamble that says nothing operational? Then flag it. ("Let me explain how this works." → delete; the next line presumably explains it.)
+- Is it part of a quoted conversation? Then skip it.
+- Is it inside a `<details>` or quote block that preserves an example? Then skip it.
 
 **False positives to skip:**
 - Quoted speech, examples of what NOT to write.
@@ -141,7 +143,7 @@ Action: delete the matched span
 
 ## F3.4 — Verbose connectors
 
-**Framework rule:** "in order to" → "to". "due to the fact that" → "because". Etc.
+**Framework rule:** "in order to" → "to". "due to the fact that" → "because". And so on.
 
 **Trigger heuristic:** match the table:
 
@@ -163,12 +165,12 @@ Action: delete the matched span
 | `\bin terms of\b` | `for` |
 
 **Agent judgment:** for each candidate, read the sentence.
-- Most of these are safe substitutions; the agent confirms the substitution preserves meaning.
-- "with respect to" sometimes means a mathematical/legal "with respect to" (calculus, regulatory) — skip those.
-- "in terms of" sometimes means "expressed as" (math) — skip if technical.
+- Most of these are safe substitutions; the agent confirms the swap preserves meaning.
+- "with respect to" sometimes means a mathematical or legal "with respect to" (calculus, regulatory). Skip those.
+- "in terms of" sometimes means "expressed as" (math). Skip it if technical.
 
 **False positives to skip:**
-- Technical/mathematical/legal usage where the longer form has precise meaning.
+- Technical, mathematical, or legal usage where the longer form carries precise meaning.
 
 **Severity:** warn.
 
@@ -186,11 +188,11 @@ Suggested edit: "{sentence after substitution}"
 
 ## F3.5 — Article density
 
-**Framework rule:** drop articles where meaning holds.
+**Framework rule:** drop articles where the meaning holds.
 
-**Trigger heuristic:** count `\b(a|an|the)\b` after stripping protected zones; compute density vs peer-file median.
+**Trigger heuristic:** count `\b(a|an|the)\b` after stripping protected zones; compute density vs the peer-file median.
 
-**Agent judgment:** flag-only — this pass is a measurement, not a fix. Articles are auto-fix unsafe (meaning shifts: "the API" vs "an API"). The agent reads the file briefly and reasons about whether the article density is unusually high *given the file's structure* (prose-heavy → expected; routing-table-heavy → unusual).
+**Agent judgment:** flag-only. This pass is a measurement, not a fix. Articles are auto-fix unsafe, since meaning shifts ("the API" vs "an API"). The agent reads the file briefly and reasons about whether the article density is unusually high *given the file's structure* (prose-heavy → expected; routing-table-heavy → unusual).
 
 **False positives to skip:**
 - Files that are mostly prose (essays, narratives).
@@ -212,18 +214,18 @@ Action: manual rewrite or run a caveman-lite pass; do NOT auto-substitute (meani
 
 ## F3.6 — Top-3 reduction targets
 
-**Framework rule:** identify largest H2/H3 sections in root CLAUDE.md as compression candidates.
+**Framework rule:** identify the largest H2/H3 sections in root CLAUDE.md as compression candidates.
 
 **Trigger heuristic:** parse all H2/H3 in root CLAUDE.md, byte-rank descending.
 
 **Agent judgment:** for the top 3, read each section and reason about realistic compression:
-- Prose-heavy section → ~50–70% compressible.
-- Mixed (prose + lists) → ~25–35%.
-- Code-heavy / table-heavy → ~5–15%.
-- Reasoning explains the structure of each top section and a realistic savings estimate (not a fixed 25%).
+- Prose-heavy section → roughly 50–70% compressible.
+- Mixed (prose + lists) → roughly 25–35%.
+- Code-heavy or table-heavy → roughly 5–15%.
+- The reasoning explains the structure of each top section and gives a realistic savings estimate (not a fixed 25%).
 
 **False positives to skip:**
-- Sections that are intentionally one big code block / table.
+- Sections that are intentionally one big code block or table.
 
 **Severity:** info (no severity; this is a measurement panel).
 
@@ -246,8 +248,8 @@ Action: candidate for caveman compression pass
 
 **Agent judgment:** for each candidate run:
 - Read the items. Are they truly categorical mappings (X maps to Y) or a list of related-but-not-tabular items?
-- Mappings → flag, suggest table with header columns derived from the items.
-- Not mappings → skip.
+- Mappings → flag them, suggest a table with header columns drawn from the items.
+- Not mappings → skip them.
 
 **False positives to skip:**
 - Steps in a procedure (1. Do X. 2. Do Y. — these are sequenced, not categorical).
@@ -267,13 +269,13 @@ Suggested table headers: | {col1} | {col2} |
 Action: convert to a markdown table
 ```
 
-**Auto-fix:** none (column header choice needs user judgment).
+**Auto-fix:** none (the column header choice needs user judgment).
 
 ---
 
 ## Protected zones
 
-Strip from consideration before any F3 check counts a hit OR any fix runs:
+Strip these from consideration before any F3 check counts a hit OR any fix runs:
 
 | Zone | Detect |
 |---|---|
@@ -288,7 +290,7 @@ Strip from consideration before any F3 check counts a hit OR any fix runs:
 | Dates | `\d{4}-\d{2}-\d{2}` |
 | Version numbers | `v?\d+\.\d+(\.\d+)?` |
 
-Findings still report original line numbers from the file (not stripped-body offsets).
+Findings still report the original line numbers from the file (not stripped-body offsets).
 
 ---
 
@@ -330,7 +332,7 @@ Used in Step 5 of SKILL.md when the user opts into caveman fixes for a specific 
 | `\bsort of\s+\b` | (delete) |
 | Pleasantry preambles per F3.3 | delete the matched span |
 
-After substitution, re-strip protected zones and verify no code/path/URL/wikilink was modified. If any protected substring is missing/mangled in the diff → abort the fix on that file and report.
+After substitution, re-strip protected zones and verify no code, path, URL, or wikilink was modified. If any protected substring is missing or mangled in the diff → abort the fix on that file and report.
 
 ---
 

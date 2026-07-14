@@ -9,9 +9,9 @@ updated: [YYYY-MM-DD]
 
 | Pain | Aware? (yes / teach them) | Cost to customer | How we address |
 |---|---|---|---|
-| [pain] | [yes — they already feel it / teach — we have to surface it] | [time / money / risk lost] | [our angle] |
+| [pain] | [yes, they already feel it / teach, we have to surface it] | [time / money / risk lost] | [our angle] |
 
-The **Aware?** column drives marketing strategy. If customers already know they have the pain, lead with the solution. If you have to teach them, lead with the problem and the cost of inaction.
+The **Aware?** column drives the marketing strategy. If customers already know they have the pain, lead with the solution. If you have to teach them, lead with the problem and the cost of doing nothing.
 
 ## Misconceptions Addressed
 

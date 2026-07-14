@@ -1,8 +1,8 @@
-This folder holds org-level context files. These are foundational documents that inform all vault work.
+This folder holds the org-level context files. These are the foundational documents that inform all vault work.
 
 ## Files
 
-Files present depend on the mode (professional vs business) and what onboarding answers were given. Not every file exists in every vault.
+Which files are present depends on the mode (professional vs business) and on the onboarding answers. Not every file exists in every vault.
 
 | File | Purpose | When created |
 |---|---|---|
@@ -14,7 +14,7 @@ Files present depend on the mode (professional vs business) and what onboarding 
 | `icp.md` | Ideal customer profile | If a target customer was named |
 | `pain-points.md` | Customer pain points and how we address them | If pains were listed |
 | `infrastructure.md` | Tool stack and integrations | If tools were listed |
-| `brand.md` | Voice, tone, messaging, visual identity | If brand exists |
+| `brand.md` | Voice, tone, messaging, visual identity | If a brand exists |
 | `team.md` | Team roster, working agreements, external contacts | If collaborators exist |
 | `strategy.md` | Goals / OKRs / quarterly priorities | If strategy exists |
 | `stakeholders.md` | Vendors, partners, investors, advisors, key clients | Business mode, if applicable |
@@ -30,5 +30,5 @@ Files present depend on the mode (professional vs business) and what onboarding 
 - Team roster, working agreements → `team.md`
 - Strategy, OKRs, quarterly goals → `strategy.md`
 - Vendors, partners, investors, advisors → `stakeholders.md`
-- These files are authoritative sources. Do not duplicate their content elsewhere.
-- During weekly reviews, flag goals / OKRs in `strategy.md` that have no active project.
+- These files are the authoritative sources. Don't duplicate their content elsewhere.
+- During weekly reviews, flag any goals / OKRs in `strategy.md` that have no active project.

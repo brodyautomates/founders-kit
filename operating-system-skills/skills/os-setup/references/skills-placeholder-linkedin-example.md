@@ -5,7 +5,7 @@ skill: linkedin-writer
 
 # Example Post
 
-<!-- Paste a LinkedIn post you liked below. It can be your own or someone else's. -->
+<!-- Paste a LinkedIn post you liked below. It can be yours or someone else's. -->
 
 ## The Post
 
@@ -13,4 +13,4 @@ skill: linkedin-writer
 
 ## Why I Like It
 
-<!-- Explain what makes this post good. Examples: "Strong hook that creates curiosity", "Personal story that ties to a business lesson", "Clean formatting that's easy to scan". -->
+<!-- What makes this post good? For example: "Strong hook that creates curiosity", "Personal story that ties to a business lesson", "Clean formatting that's easy to scan". -->

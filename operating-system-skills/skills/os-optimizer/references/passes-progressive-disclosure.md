@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # F6 — Progressive Disclosure (pass implementation)
 
 **Reference (the why):** `references/progressive-disclosure.md`.
@@ -5,7 +7,7 @@
 
 ## How this pass works
 
-Agentic. Frontmatter validation is mostly mechanical, but content-quality judgments (description triggers, reference design, terminology consistency, voodoo constants) need the agent to read the SKILL.md and its references and reason about whether the framework rule is actually violated. See F1's intro for the full pattern.
+Agentic. Frontmatter validation runs mostly mechanically, but the content-quality calls (description triggers, reference design, terminology consistency, voodoo constants) need the agent to read the SKILL.md and its references and reason about whether the framework rule is really broken. See F1's intro for the full pattern.
 
 ## Contents
 
@@ -32,7 +34,7 @@ Agentic. Frontmatter validation is mostly mechanical, but content-quality judgme
 **Trigger heuristic:** `wc -l` on body (after frontmatter).
 
 **Agent judgment:** for each oversized SKILL.md:
-- Read it. Identify which sections are detail-heavy and could move to `references/`.
+- Read it. Find which sections are detail-heavy and could move into `references/`.
 - Reasoning names specific sections and a realistic split.
 
 **Severity:** warn 400–500, fail >500.
@@ -54,10 +56,10 @@ Action: extract {specific section} → references/{topic}.md; replace with a 1-l
 
 **Trigger heuristic:** parse frontmatter `name`. Apply the constraints above.
 
-**Agent judgment:** mostly mechanical. The agent reads to suggest a better name when the current one violates:
+**Agent judgment:** mostly mechanical. The agent reads to suggest a better name when the current one breaks a rule:
 - Too long → suggest a tighter gerund-form slug.
 - Wrong chars → propose the cleaned version.
-- Reserved word → propose an alternative that captures the same intent.
+- Reserved word → propose an alternative that keeps the same intent.
 
 **Severity:** fail.
 
@@ -80,13 +82,13 @@ Action: rename
 **Trigger heuristic:** parse frontmatter `description`. Check length, presence, person, trigger keywords.
 
 **Agent judgment:** read the description and the SKILL.md body:
-- For length violations → reasoning identifies the bloat (folded scalar wasting indentation, hedged phrasing, redundant repetition); suggests a tightened version.
-- For missing triggers → reasoning lists 3–5 phrasings the user would actually say to invoke this skill (taken from reading the SKILL.md body).
-- For first/second person → suggest the third-person rewrite.
-- For too-vague descriptions → flag even if length is fine; reasoning explains what the skill does that the description doesn't capture.
+- Length violations → reasoning points to the bloat (a folded scalar wasting indentation, hedged phrasing, repeated content) and suggests a tightened version.
+- Missing triggers → reasoning lists 3–5 phrasings the user would actually type to invoke this skill (pulled from reading the SKILL.md body).
+- First or second person → suggest the third-person rewrite.
+- Too-vague descriptions → flag even when the length is fine. Reasoning states what the skill does that the description leaves out.
 
 **False positives to skip:**
-- Descriptions that include real product names that look like reserved words (e.g., "Claude API" — that's the product, not a reserved-word violation).
+- Descriptions that carry real product names that look like reserved words (e.g., "Claude API" is the product name, not a reserved-word violation).
 
 **Severity:**
 - length > 1024, missing, empty, XML tags → fail
@@ -112,7 +114,7 @@ Citation: progressive-disclosure.md → Description authoring
 **Trigger heuristic:** parse SKILL.md for markdown links → mark hop 1. Recurse hop 2.
 
 **Agent judgment:** for each 2-hop reference:
-- Read the chain. Is the deeper file truly secondary detail (good case for merging into hop-1) or a separate concern (good case for direct linking from SKILL.md)?
+- Read the chain. Is the deeper file secondary detail (good case for merging into hop-1) or a separate concern (good case for linking directly from SKILL.md)?
 - Reasoning recommends the right restructure.
 
 **Severity:** fail.
@@ -134,9 +136,9 @@ Action: {specific restructure}
 
 **Trigger heuristic:** for each `references/*.md` linked from a SKILL.md, count lines. >100 → check first 30 lines for a TOC (Contents / Table of Contents section with anchor links).
 
-**Agent judgment:** for each candidate without a TOC:
+**Agent judgment:** for each candidate that has no TOC:
 - Read the file's H2 list. Generate a suggested TOC.
-- Reasoning supplies the H2 anchors as a copy-pastable list.
+- Reasoning hands back the H2 anchors as a copy-pastable list.
 
 **Severity:** warn.
 
@@ -164,7 +166,7 @@ Action: add a "## Contents" section at the top
 ```
 
 **Agent judgment:** for each match, read the line:
-- Is it actually a Windows path or a backslash that's part of escape syntax / regex?
+- Is it actually a Windows path, or a backslash that is part of escape syntax or a regex?
 - Reasoning confirms which.
 
 **False positives to skip:**
@@ -196,8 +198,8 @@ Action: convert to forward-slash path
 ```
 
 **Agent judgment:** for each match, read:
-- Is the date anchored to a stable event (e.g., "After v2.0 release", "After feature X ships") → not time-sensitive in the rotting sense; skip.
-- Is it actually time-rotting ("After August 2025", "Starting in Q3") → flag.
+- Is the date pinned to a stable event ("After v2.0 release", "After feature X ships")? → not time-sensitive in the rotting sense. Skip.
+- Is it actually time-rotting ("After August 2025", "Starting in Q3")? → flag.
 - Is it inside `<details>` already? → skip.
 
 **Severity:** warn.
@@ -222,9 +224,9 @@ Action: move into <details> or replace with the stable anchor
 **Trigger heuristic:** in scripts (not markdown), grep for numeric literals not followed by an explanatory comment. Filter out array indices, HTTP codes, common constants (60, 1000, 1024, 3600).
 
 **Agent judgment:** for each match:
-- Is the number self-explaining from context (function name, variable name)?
-- Or is it a true voodoo constant (e.g., `30` in `if x > 30: …` with no obvious meaning)?
-- Reasoning supplies the likely meaning if inferrable, or asks for it.
+- Does the number explain itself from context (a function name, a variable name)?
+- Or is it a real voodoo constant, like `30` in `if x > 30: …` with no obvious meaning?
+- Reasoning supplies the likely meaning when it is inferrable, or asks for it.
 
 **Severity:** warn.
 
@@ -242,7 +244,7 @@ Action: add `# why ...` comment explaining the constant
 
 ## F6.9 — Inconsistent terminology
 
-**Framework rule:** consistent terminology — pick one term, use it throughout.
+**Framework rule:** consistent terminology, meaning pick one term and use it throughout.
 
 **Trigger heuristic:** scan for synonym pairs in same SKILL.md:
 
@@ -257,9 +259,9 @@ Action: add `# why ...` comment explaining the constant
 | skill / Skill / SKILL casing | pick one |
 
 **Agent judgment:** for each cluster pair, read both occurrences:
-- Are the terms truly synonyms in this skill, or do they refer to different things (e.g., `customer` = paying user, `user` = end user generally)?
-- If synonyms → flag; reasoning picks the canonical term based on first-use or majority.
-- If different things → skip; the skill is doing the right thing.
+- Are the terms genuinely synonyms in this skill, or do they name different things (say `customer` = paying user, `user` = end user in general)?
+- Synonyms → flag. Reasoning picks the canonical term based on first-use or majority.
+- Different things → skip. The skill is doing the right thing.
 
 **Severity:** warn.
 
@@ -278,12 +280,12 @@ Action: replace the non-canonical term throughout
 
 **Framework rule:** MCP tools always fully qualified.
 
-**Trigger heuristic:** detect bare tool names that look like MCP tools — references to `slack_send`, `posts_create`, `vault_read` etc. without server prefix.
+**Trigger heuristic:** detect bare tool names that look like MCP tools: references to `slack_send`, `posts_create`, `vault_read` etc. without server prefix.
 
 **Agent judgment:** for each candidate:
-- Is the tool actually an MCP tool? (Cross-reference with known patterns: `mcp__server__tool`, or context implies MCP.)
-- Or is the bare name describing a generic concept ("the search tool") not a specific MCP invocation?
-- Reasoning identifies which server the tool belongs to and proposes the qualified form.
+- Is the tool actually an MCP tool? Cross-reference with known patterns: `mcp__server__tool`, or context that implies MCP.
+- Or is the bare name describing a generic concept ("the search tool") rather than a specific MCP call?
+- Reasoning names which server the tool belongs to and proposes the qualified form.
 
 **Severity:** warn.
 
@@ -302,7 +304,7 @@ Action: qualify the tool reference
 
 ## F6.11 — Skill-vault duplication
 
-**Framework rule:** skills should not bundle their own copies of content the vault already has in `Context/`.
+**Framework rule:** skills should not carry their own copies of content the vault already holds in `Context/`.
 
 **Trigger heuristic:** filename matches across skill `references/` and vault `Context/`:
 - `icp*` / `ideal-customer*` / `customer-profile*` / `audience*` → `Context/icp.md`
@@ -313,8 +315,8 @@ Action: qualify the tool reference
 - `team*` / `org*` → `Context/team.md` or `Context/organization.md`
 
 **Agent judgment:** for each candidate pair, **read both files**:
-- Do they actually duplicate, or does the skill ref provide skill-specific augmentation?
-- Confirm the skill's SKILL.md references the duplicate file (otherwise the ref is a stale orphan, different problem).
+- Do they truly duplicate, or does the skill ref add skill-specific augmentation?
+- Confirm the skill's SKILL.md references the duplicate file (otherwise the ref is a stale orphan, which is a different problem).
 - Reasoning quotes 2-3 sentences that overlap between the two files.
 
 **Severity:** warn.
@@ -328,7 +330,7 @@ Reasoning: {overlap evidence — quote 2-3 overlapping claims}
 Action: rewrite SKILL.md to read Context/{vault-file}; delete the duplicate ref file (after grepping the skill folder)
 ```
 
-**Auto-fix:** **fixable** — agent rewrites SKILL.md to point at vault path, then greps the skill folder; if the ref isn't referenced elsewhere, deletes it. If still referenced → surfaces conflict, skips deletion.
+**Auto-fix:** **fixable**. Agent rewrites SKILL.md to point at vault path, then greps the skill folder; if the ref isn't referenced elsewhere, deletes it. If still referenced → surfaces conflict, skips deletion.
 
 ---
 
@@ -345,7 +347,7 @@ Action: rewrite SKILL.md to read Context/{vault-file}; delete the duplicate ref 
 
 **Agent judgment:** read the description:
 - Is the first/second-person phrasing actually directing the user, or is it part of a quoted example?
-- Reasoning explains why third person reads better for skill selection (Claude scans 100+ descriptions; third person is less ambiguous).
+- Reasoning explains why third person reads better for skill selection: Claude scans 100+ descriptions, and third person is less ambiguous.
 - Suggest a rewrite.
 
 **Severity:** warn.
@@ -365,4 +367,4 @@ Action: rewrite
 
 ## Finding schema
 
-Same shape as F1 — every finding has `reasoning`. See SKILL.md Step 2.4.
+Same shape as F1. Every finding carries a `reasoning` field. See SKILL.md Step 2.4.

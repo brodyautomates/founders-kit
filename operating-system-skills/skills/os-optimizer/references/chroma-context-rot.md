@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # Chroma — Context Rot research
 
 ## Contents
@@ -23,15 +25,15 @@
 
 ## Core thesis
 
-Standard NIAH (Needle In A Haystack) benchmarks make modern LLMs look reliable on long context. They aren't.
+Standard NIAH (Needle In A Haystack) benchmarks paint modern LLMs as reliable on long context. They are not.
 
-Across **18 frontier models** spanning Anthropic, OpenAI, Google, and Alibaba, the Chroma study found:
+Testing **18 frontier models** across Anthropic, OpenAI, Google, and Alibaba, the Chroma study found:
 
 > *"Model performance consistently degrades with increasing input length."*
 
-Worse: **structured (logically coherent) context can perform worse than shuffled context.** What matters is not whether information is present in the context — it's how it's presented and how much surrounds it.
+It gets worse. **Structured, logically coherent context can score below shuffled context.** The thing that decides the outcome is not whether the information sits somewhere in the context. It is how the information is presented and how much noise sits around it.
 
-This single finding rewrites the playbook for vault design. "Just put it in the context" is wrong. Curation, position, and signal-to-noise matter more than total information volume.
+That one finding changes how you design a vault. "Just put it in the context" does not hold. Curation, position, and signal-to-noise beat raw volume of information.
 
 ## The 18 models tested
 
@@ -42,11 +44,11 @@ This single finding rewrites the playbook for vault design. "Just put it in the 
 | **Google (3)** | Gemini 2.5 Pro, Gemini 2.5 Flash, Gemini 2.0 Flash |
 | **Alibaba (3)** | Qwen3-235B-A22B, Qwen3-32B, Qwen3-8B |
 
-The pattern held across **every model family**. There was no "winner" that escaped degradation — only differences in degradation slope.
+The pattern showed up in **every model family**. No model dodged the degradation. They only differed in how steeply they fell.
 
 ## Methodology — six experiments
 
-The study ran six controlled experiments to isolate which factors actually drive degradation:
+The study ran six controlled experiments to pin down which factors actually cause the degradation:
 
 | Experiment | What it varied | What it tested |
 |---|---|---|
@@ -57,7 +59,7 @@ The study ran six controlled experiments to isolate which factors actually drive
 | **5. LongMemEval** | Conversational QA at ~113k tokens vs focused ~300-token variants | What does real-world long context cost? |
 | **6. Repeated Words** | Text replication, 25–10,000 word sequences with embedded unique words | Position effect — where do unique words survive? |
 
-This design isolates the variables. NIAH-style benchmarks conflate them. That's why models look better on NIAH than they perform in practice.
+This setup separates the variables. NIAH-style benchmarks blend them together. That is why models look stronger on NIAH than they hold up in real use.
 
 ## Hard findings
 
@@ -76,13 +78,13 @@ This design isolates the variables. NIAH-style benchmarks conflate them. That's 
 
 ## The shuffled vs structured paradox
 
-The most counter-intuitive finding:
+The finding that breaks intuition:
 
 > *"Across all 18 models and needle-haystack configurations, we observe a consistent pattern that models perform better on shuffled haystacks."*
 
-Why does logical structure hurt? Because adjacent documents in a logically structured set share terminology and patterns — they look like **plausible distractors**. The model can't easily distinguish the target from its neighbors. Shuffled context disrupts this similarity, making the target stand out.
+Why does logical structure hurt? Adjacent documents in a well-ordered set share vocabulary and patterns, so they read like **plausible distractors**. The model struggles to separate the target from its neighbors. Shuffling breaks that similarity, and the target pops out.
 
-**Implication for vaults:** the "well-organized folder structure" intuition is not free. If two adjacent files use similar vocabulary (e.g., both `voice.md` and `brand.md` discuss tone), they distract each other when both load. Either:
+**Implication for vaults:** the "well-organized folder structure" instinct carries a cost. When two adjacent files reach for similar vocabulary (say `voice.md` and `brand.md` both covering tone), they pull attention away from each other whenever both load. Your options:
 - Consolidate them
 - Differentiate the vocabulary
 - Load only one at a time (per-folder CLAUDE.md / progressive disclosure)
@@ -91,22 +93,22 @@ Why does logical structure hurt? Because adjacent documents in a logically struc
 
 The study tested baseline (needle only), 1 distractor, and 4 distractors:
 
-- **1 distractor reduces performance** below baseline — measurably and consistently.
-- **4 distractors compound** the degradation, but not linearly. Each additional distractor doesn't hurt as much as the first.
-- **Distractors at positions 2 and 3** (early-but-not-first in the haystack) appear most in hallucinated responses. Possibly because the model attends heavily to early content but the very first item gets special treatment.
+- **1 distractor drops performance** below baseline, measurably and consistently.
+- **4 distractors compound** the damage, but not on a straight line. Each extra distractor hurts less than the first one did.
+- **Distractors at positions 2 and 3** (early but not first in the haystack) show up most in hallucinated responses. Likely the model leans hard on early content while the very first item gets special treatment.
 
-**Implication for vaults:** every irrelevant file you load is a distractor. The cost isn't linear in file count — the *first* irrelevant file is the worst. This is why progressive disclosure (folder CLAUDE.md loading on demand) matters more than just "smaller root CLAUDE.md."
+**Implication for vaults:** every irrelevant file you load acts as a distractor. The cost does not scale linearly with file count. The *first* irrelevant file does the most harm. That is exactly why progressive disclosure (folder CLAUDE.md loading on demand) beats simply shrinking the root CLAUDE.md.
 
 ## Position effect
 
-The repeated-words experiment found that unique words placed **early** in a long sequence had higher accuracy than ones placed deeper.
+The repeated-words experiment showed that unique words placed **early** in a long sequence scored higher than ones placed deeper.
 
 **Implication for any markdown file:**
 - The first ~10–20% gets the most attention.
 - The last ~10–20% gets significant attention.
 - The middle gets least attention.
 
-This matches Anthropic's CLAUDE.md guidance to put critical rules at the top.
+This lines up with Anthropic's CLAUDE.md guidance to put critical rules at the top.
 
 For vault docs:
 - **Lead with the decision**, not the rationale.
@@ -116,33 +118,33 @@ For vault docs:
 
 ## Family-level differences
 
-Not all models degrade the same way:
+Models fall apart in different ways:
 
-- **Claude family**: graceful degradation, lowest hallucination. When uncertain, more likely to defer or ask. Best fit for high-risk fact retrieval.
-- **GPT family**: confident hallucination at length. Generates plausible-sounding but incorrect responses. Needs validation layer in production.
-- **Gemini family**: middling on both axes; long context window doesn't translate to long-context quality.
-- **Qwen family**: capable at shorter lengths; degrades faster than Claude/GPT at extreme lengths.
+- **Claude family**: degrades gracefully, lowest hallucination. Under uncertainty it tends to defer or ask. Best fit for high-risk fact retrieval.
+- **GPT family**: hallucinates confidently at length. Produces answers that sound right and are wrong. Needs a validation layer in production.
+- **Gemini family**: middle of the pack on both axes; a long context window does not turn into long-context quality.
+- **Qwen family**: strong at shorter lengths; falls off faster than Claude and GPT at extreme lengths.
 
-The takeaway: long context window ≠ long context capability. Choose models based on observed long-context performance, not advertised window size.
+The takeaway: a long context window is not the same as long context capability. Pick models on measured long-context performance, not on the advertised window size.
 
 ## LongMemEval — focused vs full context
 
-LongMemEval tested conversational QA in two formats:
+LongMemEval ran conversational QA in two formats:
 
 1. **Focused** — ~300-token prompt with just the relevant prior turn
 2. **Full** — ~113k-token full conversation history
 
-Result: **focused dramatically outperformed full** across all models tested. Claude Opus 4 had the largest divergence — meaning even the strongest model loses meaningful capability when forced to find a needle in 113k tokens of history.
+Result: **focused beat full by a wide margin** across every model tested. Claude Opus 4 had the largest gap, which means even the strongest model gives up real capability when it has to find a needle in 113k tokens of history.
 
-**Implication for vaults:** the temptation to "just load the whole conversation history" or "include the full daily note from last week" is wrong. Curate to the relevant 300 tokens. The compaction + just-in-time retrieval pattern Anthropic recommends maps directly onto this finding.
+**Implication for vaults:** the urge to "just load the whole conversation history" or "include the full daily note from last week" is a mistake. Curate down to the relevant 300 tokens. The compaction plus just-in-time retrieval pattern Anthropic recommends maps straight onto this finding.
 
 ## The attention budget concept
 
-Transformer attention creates **n² pairwise relationships for n tokens** — meaning attention gets thinner per pair as n grows. This is the structural reason for context rot.
+Transformer attention creates **n² pairwise relationships for n tokens**, so attention thins out per pair as n grows. That is the structural cause of context rot.
 
 > Attention is a finite budget. As n grows, each token's "share" of attention shrinks. Past a certain n, the load-bearing rules in your CLAUDE.md don't get enough attention to influence behavior.
 
-This is also why even models with 200k+ context windows show degradation well before the window is full. The attention budget rots faster than the window fills.
+It also explains why models with 200k+ context windows show degradation long before the window fills. The attention budget rots faster than the window fills.
 
 ## Implications for vault architecture
 
@@ -158,23 +160,23 @@ This is also why even models with 200k+ context windows show degradation well be
 
 ## Dos
 
-- Curate context to the smallest relevant slice.
-- Place the most important info **first** in every file (not just CLAUDE.md).
+- Curate context down to the smallest relevant slice.
+- Put the most important info **first** in every file, not just in CLAUDE.md.
 - Use progressive disclosure: per-folder CLAUDE.md, on-demand references.
-- Keep root CLAUDE.md lean — it loads on every session.
-- Use Claude family when hallucination cost is high.
-- Treat the attention budget as finite even when the window isn't full.
+- Keep root CLAUDE.md lean. It loads on every session.
+- Use the Claude family when the cost of hallucination is high.
+- Treat the attention budget as finite even while the window still has room.
 - Use just-in-time retrieval over full-corpus dumps.
-- When you have similar topical files, either consolidate or load them on demand.
-- Compact aggressively at 60–70% context usage.
+- When files share a topic, either consolidate them or load them on demand.
+- Compact hard at 60–70% context usage.
 
 ## Don'ts
 
 - Don't assume "in context = retrievable." It isn't.
 - Don't add filler "for completeness" — every irrelevant chunk is a distractor.
-- Don't rely on logical structure to save you (it can hurt retrieval).
+- Don't count on logical structure to save you (it can hurt retrieval).
 - Don't bury critical facts deep in long files.
-- Don't max out the context window because it's available.
+- Don't max out the context window just because it's available.
 - Don't load the full daily/conversation history when you can curate to the relevant turn.
 - Don't confuse window size with capability — always test long-context performance for your task.
 - Don't put two similar topical files (e.g., `voice.md` + `brand.md`) in the same load path without differentiation.

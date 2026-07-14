@@ -17,7 +17,7 @@ Thumbs.db
 *.key
 *.pem
 
-# Private user content (never commit to public repo)
+# Private user content (never commit to a public repo)
 Intelligence/meetings/team-standups/*.md
 Intelligence/meetings/client-calls/*.md
 Intelligence/meetings/one-on-ones/*.md
@@ -30,7 +30,7 @@ Daily/*.md
 # finance/
 # health/
 
-# Node modules (if using any scripts)
+# Node modules (if you use any scripts)
 node_modules/
 
 # Logs

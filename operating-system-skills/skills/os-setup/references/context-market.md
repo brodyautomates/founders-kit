@@ -7,11 +7,11 @@ updated: [YYYY-MM-DD]
 
 ## Target Industry
 
-[Broad introduction to the industry you operate in.]
+[A broad introduction to the industry you operate in.]
 
 ## Target Niche
 
-[The specific niche or sub-segment you focus on within that industry.]
+[The specific niche or sub-segment you focus on inside that industry.]
 
 ## Trends & Hot Topics
 
@@ -20,7 +20,7 @@ updated: [YYYY-MM-DD]
 
 ## What's Broken
 
-[The inefficiency, broken process, or status quo you're betting against. The thing that's not going well in this industry.]
+[The inefficiency, broken process, or status quo you're betting against. The thing that isn't going well in this industry.]
 
 ## What Changed (Last 5–10 Years)
 
@@ -28,10 +28,10 @@ updated: [YYYY-MM-DD]
 
 ## Main Players
 
-- **Incumbents**: [the established players we're displacing or competing with]
+- **Incumbents**: [the established players you're displacing or competing with]
 - **Direct competitors**: [companies solving the same problem the same way]
 - **Adjacent categories**: [companies solving adjacent problems or attacking from a different angle]
 
 ## Required Expertise
 
-[What you absolutely need to know or have to succeed in this market.]
+[What you absolutely need to know or have to win in this market.]

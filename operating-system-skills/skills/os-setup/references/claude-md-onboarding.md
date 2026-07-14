@@ -1,4 +1,4 @@
-This folder contains onboarding documentation for different roles and contexts.
+This folder holds onboarding documentation for different roles and contexts.
 
 ## Routing
 
@@ -10,7 +10,7 @@ This folder contains onboarding documentation for different roles and contexts.
 
 ## Rules
 
-- When onboarding documentation is shared, route it here with a descriptive filename.
-- Each onboarding doc should be a standalone SOP: clear, direct, step-by-step.
+- When onboarding documentation gets shared, route it here with a descriptive filename.
+- Each onboarding doc is a standalone SOP: clear, direct, step-by-step.
 - Use `[[wikilinks]]` to reference the people, tools, and processes involved.
-- If a process is department-specific, consider whether it belongs here or in `Departments/{name}/sops/` instead.
+- If a process is department-specific, decide whether it belongs here or in `Departments/{name}/sops/` instead.

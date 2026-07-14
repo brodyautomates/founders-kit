@@ -1,62 +1,63 @@
 ---
 name: os-setup
-description: Stand up your AI operating system from an empty folder. Builds the full vault structure, system files, config, memory layer, hooks, and output styles, then interviews you to make it yours. Two modes — Solo/Professional (default) or Business/Team. Trigger on "set up", "bootstrap", "initialize", "onboard", or /os-setup.
+description: Stand up The Brody Operating System vault from an empty folder and run personalized onboarding. Builds every directory, writes the system files, Obsidian config, memory system, hooks, and output styles, then interviews the user to fill it in. Two modes: Solopreneurs/Professionals (default) and Business/Teams. Trigger it when the user says "set up", "bootstrap", "initialize", "onboarding", or runs /os-setup.
 ---
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
 
-# Operator OS — Setup + Onboarding
+# The Brody Operating System: Setup + Onboarding
 
-Run this when someone types `/os-setup` or asks to stand up their vault, bootstrap the assistant, initialize the system, or get their operating system going.
+Run this WHEN the user runs `/setup`, asks to set up their vault, bootstrap the assistant, initialize the system, or configure The Brody Operating System.
 
-Three phases, in order:
-- **Phase 0 — Mode:** pick which OS variant to build
-- **Phase A — Bootstrap:** create the folders and system files for that mode
-- **Phase B — Onboard:** interview the user and personalize everything
+There are three phases:
+- **Phase 0**: Mode Selection. Pick which OS variant to build.
+- **Phase A**: Bootstrap. Build the directory structure and system files for that mode.
+- **Phase B**: Onboarding. Interview the user and fill everything in.
 
 ## Pre-flight Check
 
-Check if `claude.md` or `CLAUDE.md` exists **only** in the current working directory (do NOT search subdirectories or parent directories — check only the exact CWD path).
+Look for `claude.md` or `CLAUDE.md` **only** in the current working directory. Do not search subdirectories or parent directories. Check the exact CWD path and nothing else.
 
-- **If it exists**: The vault is already set up. Ask the user:
-  - "This vault is already set up. Would you like to:"
-  - **Re-run the interview** — Keep existing structure, update memory files based on new answers
-  - **Full reset** — Delete everything and start fresh (confirm twice before proceeding)
-  - **Cancel** — Do nothing
-- **If it does NOT exist**: Proceed with full setup (Phase 0 + Phase A + Phase B)
+- **If it exists**: The vault is already set up. Ask the user which they want:
+  - "This vault is already set up. Pick one:"
+  - **Re-run the interview**: Keep the structure, refresh the memory files from new answers.
+  - **Full reset**: Wipe everything and start over. Confirm twice before you touch anything.
+  - **Cancel**: Leave it alone.
+- **If it does NOT exist**: Run the full setup (Phase 0 + Phase A + Phase B).
 
 ---
 
 ## Phase 0: Mode Selection
 
-Ask the user to pick a mode using AskUserQuestion with these exact `label` and `description` values:
+Ask the user to choose a mode with AskUserQuestion, using these exact `label` and `description` values:
 
 - Question: `What type of vault do you want?`
-- Option 1 label: `Solopreneurs/Professionals` — description: `Blends work and personal. Best for solo founders, freelancers, consultants.`
-- Option 2 label: `Business/Teams` — description: `Org structure with departments, processes, stakeholders. Best for teams and companies.`
+- Option 1 label: `Solopreneurs/Professionals`, description: `Blends work and personal. Best for solo founders, freelancers, consultants.`
+- Option 2 label: `Business/Teams`, description: `Org structure with departments, processes, stakeholders. Best for teams and companies.`
 
-**CRITICAL**: You MUST pass both `label` AND `description` for each option in AskUserQuestion. The `description` field is what explains each mode to the user. Never leave `description` empty.
+**CRITICAL**: Pass both `label` AND `description` for every option in AskUserQuestion. The `description` is what explains each mode. Never leave `description` empty.
 
 Mode mapping:
 - Solopreneurs/Professionals → `os-mode: professional`
 - Business/Teams → `os-mode: business`
 
-Accept any clear signal: "solo", "professional", "freelancer", "business", "org", "team", etc.
+Take any clear signal: "solo", "professional", "freelancer", "business", "org", "team", and so on.
 
-If the user skips or says "I don't know", use **Solopreneurs/Professionals** (professional mode).
+If the user skips or says "I don't know", default to **Solopreneurs/Professionals** (professional mode).
 
-Store the selected mode. It will be written to `CLAUDE.md` frontmatter as `os-mode: professional | business`.
+Hold onto the chosen mode. It gets written into `CLAUDE.md` frontmatter as `os-mode: professional | business`.
 
 ---
 
 ## Phase A: Bootstrap
 
-Create the directory structure and write all system files for the selected mode.
+Build the directory structure and write every system file for the chosen mode.
 
 ### Resolving reference file paths
 
-Every `references/<file>.md` mentioned below lives in the `references/` subdirectory next to **this SKILL.md** — not in the user's working directory. Two conventions matter:
+Every `references/<file>.md` named below lives in the `references/` subdirectory next to **this SKILL.md**, not in the user's working directory. Two conventions matter:
 
-- **Read paths** (`references/foo.md`) → resolve relative to this SKILL.md's directory.
-- **Write paths** (`./Foo/CLAUDE.md`) → resolve relative to the user's current working directory (the vault root).
+- **Read paths** (`references/foo.md`) → resolve against this SKILL.md's directory.
+- **Write paths** (`./Foo/CLAUDE.md`) → resolve against the user's current working directory (the vault root).
 
 If the Read tool can't open a `references/...` path directly (some harnesses mount the skill at a path that differs between Read and Bash), run a quick discovery step **once** before Step A.2:
 
@@ -65,7 +66,7 @@ If the Read tool can't open a `references/...` path directly (some harnesses mou
 find / -type d -path '*/setup/references' 2>/dev/null | head -1
 ```
 
-Use that absolute path as the prefix for every reference read in Phase A and Phase B. Don't retry path resolution per-file — do it once and reuse.
+Use that absolute path as the prefix for every reference read in Phase A and Phase B. Resolve it once and reuse it. Don't retry path resolution file by file.
 
 ### Step A.1: Create Directory Structure
 
@@ -114,13 +115,13 @@ mkdir -p Onboarding
 mkdir -p Resources/templates
 ```
 
-`Team/` is created empty here. Profile-first subfolders (`Team/{org}/Profiles/{person}/...`) are scaffolded in Phase B once Q6 answers are in.
+`Team/` starts empty here. The profile-first subfolders (`Team/{org}/Profiles/{person}/...`) get scaffolded in Phase B once the Q6 answers are in.
 
 ### Step A.2: Write System Files from References
 
-Read each reference file and write it to the corresponding local path. The reference files contain the complete content for each system file.
+Read each reference file and write it to its local path. The reference files hold the full content for each system file.
 
-**All modes** — shared system files:
+**All modes**: shared system files:
 
 | Reference File | Creates at Local Path |
 |---|---|
@@ -135,7 +136,7 @@ Read each reference file and write it to the corresponding local path. The refer
 | Solopreneurs/Professionals | `references/claude-md-template.md` | `./CLAUDE.md` |
 | Business | `references/claude-md-template-business.md` | `./CLAUDE.md` |
 
-**Per-folder routing indexes** (every major folder gets its own `CLAUDE.md` — matches production vault convention):
+**Per-folder routing indexes** (every major folder gets its own `CLAUDE.md`, matching the production vault convention):
 
 | Mode | Reference File | Creates at Local Path |
 |---|---|---|
@@ -156,18 +157,18 @@ Read each reference file and write it to the corresponding local path. The refer
 | Business | `references/claude-md-onboarding.md` | `./Onboarding/CLAUDE.md` |
 | Business | `references/claude-md-processes.md` | `./Intelligence/processes/CLAUDE.md` |
 
-For each row applicable to the selected mode: read the reference file, then write its content to the local path.
+For each row that applies to the chosen mode: read the reference file, then write its content to the local path.
 
 ### Step A.3: Initialize Starter Context Files
 
-**All modes** — create placeholder skill folders:
+**All modes**: create placeholder skill folders:
 
 ```bash
 mkdir -p Skills/linkedin-writer/references
 mkdir -p Skills/newsletter-writer/references
 ```
 
-Then write placeholder files from references:
+Then write the placeholder files from references:
 - Read `references/skills-placeholder-linkedin-notes.md` → write to `./Skills/linkedin-writer/notes.md`
 - Read `references/skills-placeholder-linkedin-example.md` → write to `./Skills/linkedin-writer/references/example-post.md`
 - Read `references/skills-placeholder-newsletter-strategy.md` → write to `./Skills/newsletter-writer/strategy.md`
@@ -182,7 +183,7 @@ Then write placeholder files from references:
 - Read `references/context-team.md` → write to `./Context/team.md`
 - Read `references/context-strategy-business.md` → write to `./Context/strategy.md`
 
-**Business mode — `Team/` is created empty in Phase A.** Profile-first scaffolding (`Team/{org}/Profiles/{person}/...`) happens in Phase B Build Step 3 once Q6 answers identify the actual people.
+**Business mode: `Team/` is created empty in Phase A.** The profile-first scaffolding (`Team/{org}/Profiles/{person}/...`) happens in Phase B Build Step 3, once the Q6 answers name the actual people.
 
 ### Step A.4: Make Hooks Executable
 
@@ -194,28 +195,28 @@ chmod +x .claude/hooks/*.sh
 
 Tell the user:
 - "Vault structure created successfully in **[mode]** mode."
-- List the main folders created (varies by mode), including `Skills/`
-- Recommend opening this folder as a vault in Obsidian
-- Recommend installing **TaskNotes** community plugin if they want task management features
-- Note that **Bases** (native database views) are built into Obsidian — no plugin needed for queries
-- Mention `Resources/` for storing prompts, frameworks, swipe files, and templates
+- List the main folders you created (varies by mode), including `Skills/`
+- Suggest opening this folder as a vault in Obsidian
+- Suggest installing the **TaskNotes** community plugin if they want task management features
+- Point out that **Bases** (native database views) ship with Obsidian, so queries need no plugin
+- Mention `Resources/` as the home for prompts, frameworks, swipe files, and templates
 - "Now let's personalize it for you."
 
-Then proceed to Phase B.
+Then move to Phase B.
 
 ---
 
-## Phase B: Onboarding — Guided Brain Dump
+## Phase B: Onboarding, Guided Brain Dump
 
-This skill runs **inside Cowork**. Phase B uses Cowork's rich-HTML widget tool — **not** AskUserQuestion — to render a real form with stacked categories, free-text textareas, and proper styling (matches the look of `os-optimizer`'s "Audit run details" form).
+This skill runs **inside Cowork**. Phase B uses Cowork's rich-HTML widget tool, **not** AskUserQuestion, so it can render a real form with stacked categories, free-text textareas, and proper styling (it matches the look of `os-optimizer`'s "Audit run details" form).
 
-It's a guided brain dump across **12 categories** of the user's life and business, batched into **3 rich-HTML forms** (4 categories per form). Bullet points inside each category are **inspiration prompts** — riff on whatever lands.
+It's a guided brain dump across **12 categories** of the user's life and business, batched into **3 rich-HTML forms** (4 categories per form). The bullet points inside each category are **inspiration prompts**. The user riffs on whatever lands.
 
-The pitch to the user: *sit down for an hour or two, pour a beer, order a pizza, and brain-dump. It's not only for the assistant to feel personal on day one — it's a useful exercise in itself.*
+The pitch to the user: sit down for an hour or two, pour a beer, order a pizza, and brain-dump. This does two things at once. It makes the assistant feel personal on day one, and it's a useful exercise on its own.
 
 ### The tool: `mcp__visualize__show_widget` (Cowork-only)
 
-Each of the 3 forms is **one** call to `mcp__visualize__show_widget`. The tool accepts:
+Each of the 3 forms is **one** call to `mcp__visualize__show_widget`. The tool takes:
 
 | Field | Purpose |
 |---|---|
@@ -223,42 +224,42 @@ Each of the 3 forms is **one** call to `mcp__visualize__show_widget`. The tool a
 | `loading_messages` | Array of short strings shown while the form renders |
 | `widget_code` | Raw HTML for the form (uses Cowork's `elicit-*` class conventions) |
 
-The user fills in the form and submits. The submitted values come back to the agent as the tool result. The agent then proceeds to the next form. No AskUserQuestion. No radio buttons. No "Other" box.
+The user fills in the form and submits. The submitted values come back to the agent as the tool result. The agent then moves to the next form. No AskUserQuestion. No radio buttons. No "Other" box.
 
-### How the user should respond — per category
+### How the user should respond: per category
 
 Inside each category's textarea, the user can:
 
-1. **Paste a Whisper / dictation transcript** — open phone or Mac dictation, ramble for 2–5 minutes, paste the transcript.
-2. **Paste documents** — links to PDFs, Notion pages, Google Docs, brand guides, About pages, LinkedIn profiles, OKR docs, decks. Or drop file paths.
-3. **Point at connectors** — paste a Notion workspace URL, a wiki link, a Drive folder.
+1. **Paste a Whisper / dictation transcript**: open phone or Mac dictation, ramble for 2–5 minutes, paste the transcript.
+2. **Paste documents**: links to PDFs, Notion pages, Google Docs, brand guides, About pages, LinkedIn profiles, OKR docs, decks. Or drop file paths.
+3. **Point at connectors**: paste a Notion workspace URL, a wiki link, a Drive folder.
 4. **Type long-form free text.**
 
-Two kinds of knowledge: **what lives in your head** (Whisper it) and **what already lives online or in a tool** (paste links / docs). Mix freely per category. Leave a textarea blank to skip that category.
+There are two kinds of knowledge: **what lives in your head** (Whisper it) and **what already lives online or in a tool** (paste links / docs). Mix freely per category. Leave a textarea blank to skip that category.
 
-### Before Form 1 — Send one orienting message
+### Before Form 1: Send one orienting message
 
-Send this verbatim (or close to it), no tool call yet:
+Send this verbatim (or close to it). No tool call yet:
 
-> Three short forms, four categories each, twelve categories total. This isn't a quiz — it's a guided brain dump.
+> Three short forms, four categories each, twelve categories total. This isn't a quiz. It's a guided brain dump.
 >
-> Each category has three ways to give me context: a **brain-dump textarea**, a **links & file paths field**, and a **file upload**. Use any or all. Brain-dump anything around the bullet inspirations — you don't have to hit each one. Leave a category blank to skip it.
+> Each category gives you three ways to hand me context: a **brain-dump textarea**, a **links & file paths field**, and a **file upload**. Use any or all. Brain-dump anything around the bullet inspirations. You don't have to hit each one. Leave a category blank to skip it.
 >
-> Best inputs: a Whisper / dictation transcript, an About page URL, a brand guide PDF, an OKR doc, a LinkedIn profile, a Notion page. The more you give me, the less generic your vault will be on day one.
+> Best inputs: a Whisper / dictation transcript, an About page URL, a brand guide PDF, an OKR doc, a LinkedIn profile, a Notion page. The more you give me, the less generic your vault is on day one.
 >
 > Sit down for an hour or two. Pour a beer. Order a pizza. This is worth it.
 >
-> Submit each form when ready. Type "skip all" anytime to jump to defaults.
+> Submit each form when it's ready. Type "skip all" anytime to jump to defaults.
 
 ### Widget HTML template (every category in every form uses this shape)
 
-Each category gets **three inputs**: a brain-dump textarea, a links/paths textarea, and a file upload input. Any or all can be filled. All blank = skip.
+Each category gets **three inputs**: a brain-dump textarea, a links/paths textarea, and a file upload input. Any or all can be filled. All blank means skip.
 
-Inside `widget_code` for each form, build a `<form class="elicit">` containing one header and four `elicit-group` blocks. Per category:
+Inside `widget_code` for each form, build a `<form class="elicit">` with one header and four `elicit-group` blocks. Per category:
 
 ```html
 <div class="elicit-group">
-  <label class="elicit-question">{N}/12 — {Category name}</label>
+  <label class="elicit-question">{N}/12: {Category name}</label>
   <div class="elicit-bullets" style="font-size:13px; color:var(--color-text-secondary); margin:8px 0">
     <ul style="margin:0; padding-left:18px">
       <li>{inspiration bullet 1}</li>
@@ -271,11 +272,11 @@ Inside `widget_code` for each form, build a `<form class="elicit">` containing o
 
   <textarea class="elicit-textarea" name="cat{N}_braindump" rows="6"
     style="width:100%; border-radius:10px; padding:10px; border:1px solid var(--color-border-subtle); font-family:inherit; font-size:13px; margin-bottom:8px"
-    placeholder="Brain dump — paste a Whisper transcript, or type long-form…"></textarea>
+    placeholder="Brain dump: paste a Whisper transcript, or type long-form…"></textarea>
 
   <textarea class="elicit-textarea" name="cat{N}_links" rows="2"
     style="width:100%; border-radius:10px; padding:10px; border:1px solid var(--color-border-subtle); font-family:inherit; font-size:13px; margin-bottom:8px"
-    placeholder="Links & file paths — one per line (Notion URL, LinkedIn profile, /path/to/file.pdf, etc.)"></textarea>
+    placeholder="Links & file paths: one per line (Notion URL, LinkedIn profile, /path/to/file.pdf, etc.)"></textarea>
 
   <input class="elicit-file" type="file" name="cat{N}_files" multiple
     accept=".md,.txt,.pdf,.docx,.pptx,.xlsx,.csv,.json,.yaml,.yml,.png,.jpg,.jpeg"
@@ -295,7 +296,7 @@ And one header at the top of `<form class="elicit">`:
 </div>
 ```
 
-Reuse the SVG icon pattern from the `os-optimizer` `Audit run details` widget (clipboard-with-marks icon). Form titles: "You & business", "Customer & brand", "How you operate" (solo) — or "You & company", "Offer, customer & brand", "How the company operates" (business).
+Reuse the SVG icon pattern from the `os-optimizer` `Audit run details` widget (the clipboard-with-marks icon). Form titles: "You & business", "Customer & brand", "How you operate" (solo), or "You & company", "Offer, customer & brand", "How the company operates" (business).
 
 ### Reading form submissions
 
@@ -305,32 +306,32 @@ When the widget returns, the result is a record mapping each input's `name` to i
 - `cat{N}_links` → string (newline-separated URLs and file paths)
 - `cat{N}_files` → array of file references (Cowork uploads these into the workspace folder; the result gives you the paths or signed URLs)
 
-A category is "skipped" only when all three inputs are empty/blank.
+A category counts as "skipped" only when all three inputs are empty or blank.
 
 ### Ingestion between forms
 
 After each form returns, for each category (N = 1..4 in this form):
 
-1. **`cat{N}_braindump`** — if non-empty, tag and store raw in the working corpus under the category. Don't paraphrase.
-2. **`cat{N}_links`** — split on newlines. For each line:
+1. **`cat{N}_braindump`**: if non-empty, tag it and store it raw in the working corpus under the category. Don't paraphrase.
+2. **`cat{N}_links`**: split on newlines. For each line:
    - HTTP(S) URL → fetch with WebFetch / WebSearch.
    - Local file path → Read it.
    - Folder path → Glob, then Read each file.
-3. **`cat{N}_files`** — for each uploaded file:
+3. **`cat{N}_files`**: for each uploaded file:
    - `.md`, `.txt`, `.json`, `.yaml`, `.csv` → Read directly
-   - `.pdf` → Read with `pages` param if large
-   - `.docx`/`.pptx`/`.xlsx` → use `pandoc` / `textutil` via Bash if available; otherwise note and continue
+   - `.pdf` → Read with the `pages` param if large
+   - `.docx`/`.pptx`/`.xlsx` → use `pandoc` / `textutil` via Bash if available; otherwise note it and continue
    - Images → Read (multimodal)
 
-Merge everything into the corpus tagged by category. Then immediately fire the next form. No commentary or summarization between forms.
+Merge everything into the corpus, tagged by category. Then fire the next form right away. No commentary or summarization between forms.
 
-Both modes use Oskar's category breakdown. Bullet inspiration prompts are Oskar's prompt blocks verbatim, plus Brody's framing of "brain-dump anything around any of these bullets."
+Both modes use the same category breakdown. The bullet inspiration prompts are the standard prompt blocks, plus the framing of "brain-dump anything around any of these bullets."
 
 ---
 
-### Solopreneurs/Professionals mode — 3 forms × 4 categories
+### Solopreneurs/Professionals mode: 3 forms × 4 categories
 
-**Form 1 — You & business** — one `mcp__visualize__show_widget` call. Title: `os_setup_form_1_you_business`. Contains Q1–Q4 as stacked `elicit-group` blocks.
+**Form 1: You & business**: one `mcp__visualize__show_widget` call. Title: `os_setup_form_1_you_business`. Holds Q1–Q4 as stacked `elicit-group` blocks.
 
 **Q1. You.** Form header: `You`
 Bullets:
@@ -344,7 +345,7 @@ Bullets:
 - Why you started or joined what you're doing now
 - A belief or POV you hold strongly, even when it's unpopular
 - The "big idea" your work is built on (the wedge, the thesis)
-- Who or what you're fighting against — a category, a behavior, a competitor archetype, a status quo
+- Who or what you're fighting against: a category, a behavior, a competitor archetype, a status quo
 
 **Q3. What you sell.** Header: `Lines`
 Bullets (one paragraph per revenue line, or skip if none yet):
@@ -358,9 +359,9 @@ Bullets:
 - For each problem: are customers already aware they have it, or do you have to teach them?
 - Your value proposition in one sentence
 - The promise or guarantee you make (explicit or implicit)
-- Why customers actually pick you — in their words if you've heard them say it
+- Why customers actually pick you, in their words if you've heard them say it
 
-**Form 2 — Customer & brand** — one `mcp__visualize__show_widget` call. Title: `os_setup_form_2_customer_brand`. Contains Q5–Q8 as stacked `elicit-group` blocks.
+**Form 2: Customer & brand**: one `mcp__visualize__show_widget` call. Title: `os_setup_form_2_customer_brand`. Holds Q5–Q8 as stacked `elicit-group` blocks.
 
 **Q5. The customer.** Header: `Customer`
 Bullets:
@@ -368,7 +369,7 @@ Bullets:
 - What their day looks like, what tools they live in
 - The language and words *they* use to describe their problem
 - The dream outcome they want
-- The situation they're in *before* they come to you — what triggered the search
+- The situation they're in *before* they come to you, and what triggered the search
 - How long they typically take to decide to buy
 - The media, podcasts, newsletters, or creators they follow
 - 3–5 real examples (names, LinkedIn profiles, or company names)
@@ -397,7 +398,7 @@ Bullets:
 - The *why* behind each
 - What you're explicitly saying no to in order to focus here
 
-**Form 3 — How you operate** — one `mcp__visualize__show_widget` call. Title: `os_setup_form_3_how_you_operate`. Contains Q9–Q12 as stacked `elicit-group` blocks.
+**Form 3: How you operate**: one `mcp__visualize__show_widget` call. Title: `os_setup_form_3_how_you_operate`. Holds Q9–Q12 as stacked `elicit-group` blocks.
 
 **Q9. Active projects.** Header: `Projects`
 Bullets (for each project):
@@ -414,28 +415,28 @@ Bullets:
 **Q11. Your stack.** Header: `Stack`
 Bullets:
 - Stack across communication, meetings, CRM, content, finance, dev, automation
-- Source of truth for each main workflow — where deals live, where decisions live, where writing actually happens, where the calendar lives
+- Source of truth for each main workflow: where deals live, where decisions live, where writing actually happens, where the calendar lives
 
 **Q12. Drains and workflows to automate.** Header: `Drains`
 Bullets:
 - Top 1–2 painful, repetitive workflows. Use this template:
   When **X** happens → I do **Y** → it takes **Z** time → output is **W** → what I want is **V**
-- What's draining your attention right now — unclosed loops, decisions sitting unmade, things that should be done but aren't
+- What's draining your attention right now: unclosed loops, decisions sitting unmade, things that should be done but aren't
 
 ---
 
-### Business/Teams mode — 3 forms × 4 categories
+### Business/Teams mode: 3 forms × 4 categories
 
 Same question shape as solo mode. Three `AskUserQuestion` calls, four questions each.
 
-**Form 1 — You & company** — one `mcp__visualize__show_widget` call. Title: `os_setup_form_1_you_company`. Contains Q1–Q4 as stacked `elicit-group` blocks.
+**Form 1: You & company**: one `mcp__visualize__show_widget` call. Title: `os_setup_form_1_you_company`. Holds Q1–Q4 as stacked `elicit-group` blocks.
 
 **Q1. You, as operator.** Header: `Operator`
 Bullets:
 - Name, title, department, who you report to
 - Decision authority (what you can sign off on alone)
 - Location, working style
-- What's draining your attention right now — unclosed loops, decisions sitting unmade
+- What's draining your attention right now: unclosed loops, decisions sitting unmade
 
 **Q2. The company.** Header: `Company`
 Bullets:
@@ -451,7 +452,7 @@ Bullets:
 - The broad target industry
 - The specific niche you operate in
 - Trends and hot topics in the industry right now
-- What's not going well in the industry — the inefficiency or broken thing you're betting against
+- What's not going well in the industry: the inefficiency or broken thing you're betting against
 - What changed in the last 5–10 years
 - The main players (incumbents, competitors, adjacent categories)
 
@@ -460,7 +461,7 @@ Bullets (for each revenue line):
 - Name, what it does, who buys it
 - Current revenue baseline, status (active, new, sunsetting)
 
-**Form 2 — Offer, customer & brand** — one `mcp__visualize__show_widget` call. Title: `os_setup_form_2_offer_customer_brand`. Contains Q5–Q8 as stacked `elicit-group` blocks.
+**Form 2: Offer, customer & brand**: one `mcp__visualize__show_widget` call. Title: `os_setup_form_2_offer_customer_brand`. Holds Q5–Q8 as stacked `elicit-group` blocks.
 
 **Q5. The promise.** Header: `Offer`
 Bullets:
@@ -470,15 +471,15 @@ Bullets:
 - The promise or guarantee you make
 - Key features and capabilities that deliver the value
 - Why customers actually pick you over alternatives
-- The kind of results you typically deliver — include a real example if you have one
+- The kind of results you typically deliver, with a real example if you have one
 
 **Q6. The customer.** Header: `ICP`
 Bullets:
-- Who's in charge of buying — title, role, responsibilities
+- Who's in charge of buying: title, role, responsibilities
 - What their day looks like, what tools they use
 - The language and words *they* use to describe their problem
 - Dream outcome they want
-- Situation before buying — what triggered them to look
+- Situation before buying, and what triggered them to look
 - How long the buying decision typically takes
 - Market trends affecting them right now
 - Media, podcasts, or creators they follow
@@ -498,13 +499,13 @@ Bullets:
 
 **Q8. The positioning.** Header: `Position`
 Bullets:
-- The enemy — the category, status quo, or competitor archetype you're fighting
+- The enemy: the category, status quo, or competitor archetype you're fighting
 - How you solve the problem *differently* from obvious competitors
 - Brand personality in 5 adjectives
 - The "big concept" the company is built on
 - 3–4 distinct messages you want associated with the brand
 
-**Form 3 — How the company operates** — one `mcp__visualize__show_widget` call. Title: `os_setup_form_3_how_company_operates`. Contains Q9–Q12 as stacked `elicit-group` blocks.
+**Form 3: How the company operates**: one `mcp__visualize__show_widget` call. Title: `os_setup_form_3_how_company_operates`. Holds Q9–Q12 as stacked `elicit-group` blocks.
 
 **Q9. The team.** Header: `Team`
 Bullets:
@@ -529,7 +530,7 @@ Bullets (for each project):
 **Q12. Stack, workflows, and stakeholders.** Header: `Stack`
 Bullets:
 - Stack across communication, meetings, CRM, PM, content, finance, dev
-- Source of truth for each main workflow — where deals live, where decisions live, where writing happens, where the calendar lives
+- Source of truth for each main workflow: where deals live, where decisions live, where writing happens, where the calendar lives
 - Top 3 painful, repetitive workflows. Template:
   When **X** happens → we do **Y** → it takes **Z** → output is **W** → what we want is **V**
 - External stakeholders: investors, partners, vendors, top clients. Name, type, nature of the relationship.
@@ -537,102 +538,102 @@ Bullets:
 ---
 
 The user submits each form with one click. Per-category response patterns:
-- Type / paste a brain dump, transcript, links, docs, or file paths into the textarea
+- Type or paste a brain dump, transcript, links, docs, or file paths into the textarea
 - Leave the textarea blank to skip that category
-- Reply "skip all" between forms — stop asking and move to Phase B+
+- Reply "skip all" between forms to stop the questions and move to Phase B+
 
-**Accept whatever they give.** Don't ask follow-ups inside or between forms. Extract what you can.
+**Take whatever they give.** Don't ask follow-ups inside or between forms. Pull out what you can.
 
-**If the user submits every form empty** — proceed to build with defaults only.
+**If the user submits every form empty**: build with defaults only.
 
 ---
 
 ## Phase B+: Additional Context Drop
 
-After Q12 (or "skip all") and **before** Phase B Build, ask one final `AskUserQuestion` to invite any leftover source material that didn't surface during the 12 categories. Most users still have brand decks, About pages, intake forms, LinkedIn URLs, Notion docs, PDFs, slide exports, voice/style guides, OKR docs, org charts, project briefs, etc. Always ask, even if Q1–Q12 looked rich.
+After Q12 (or "skip all") and **before** Phase B Build, ask one final `AskUserQuestion` to pull in any leftover source material that didn't surface during the 12 categories. Most users still have brand decks, About pages, intake forms, LinkedIn URLs, Notion docs, PDFs, slide exports, voice/style guides, OKR docs, org charts, project briefs, and so on. Always ask, even if Q1–Q12 looked rich.
 
 **Call AskUserQuestion** (one question, header: `Context`):
-- Question: "Anything else I should pull from before building? Upload files (PDFs, MDs, DOCXs), paste links (LinkedIn, websites, Notion pages, Google Docs), point me at a local folder, or paste raw text. The more I have, the more personalized your vault will be — instead of template scaffolds with placeholders."
+- Question: "Anything else I should pull from before building? Upload files (PDFs, MDs, DOCXs), paste links (LinkedIn, websites, Notion pages, Google Docs), point me at a local folder, or paste raw text. The more I have, the more personalized your vault gets, instead of template scaffolds with placeholders."
 - Options:
-  - `Yes — I'll paste links / upload files` — "Walk me through it"
-  - `Yes — point me at a folder on disk` — "I have local files"
-  - `No — use just the answers above` — "Build with what we have"
-  - `Skip` — "Skip this step"
+  - `Yes: I'll paste links / upload files`: "Walk me through it"
+  - `Yes: point me at a folder on disk`: "I have local files"
+  - `No: use just the answers above`: "Build with what we have"
+  - `Skip`: "Skip this step"
 
 **If the user picks a "Yes" option** (or pastes content directly):
 
-1. Collect everything they share. Be greedy — accept anything they offer.
-2. **For each link**: call `WebFetch` (or `WebSearch` if the URL is a search). Extract the relevant content.
+1. Collect everything they share. Be greedy. Take anything they offer.
+2. **For each link**: call `WebFetch` (or `WebSearch` if the URL is a search). Pull out the relevant content.
 3. **For each uploaded file or local file path**:
    - `.md`, `.txt`, `.json`, `.yaml`, `.csv` → read directly with `Read`
-   - `.pdf` → read with `Read` (use `pages` parameter if >10 pages)
+   - `.pdf` → read with `Read` (use the `pages` parameter if >10 pages)
    - `.docx`, `.pptx`, `.xlsx` → use Bash with `pandoc` or `textutil` if available; otherwise tell the user to export as PDF or MD and re-share
    - Images / screenshots → read with `Read` (multimodal)
 4. **For a local folder path**: use `Glob` to enumerate, then read each file.
-5. **Maintain a context corpus** in working memory — every fact, name, number, quote you find. Tag each by likely target (`me.md`, `brand.md`, `icp.md`, `strategy.md`, `projects/{name}`, etc.).
-6. After ingestion, briefly tell the user what you pulled (e.g., "Pulled 4 files: brand-guidelines.pdf, about-page.md, okrs-2026.md, team-roster.csv. 18 links fetched."). One sentence. Then proceed to Build.
+5. **Keep a context corpus** in working memory: every fact, name, number, quote you find. Tag each by likely target (`me.md`, `brand.md`, `icp.md`, `strategy.md`, `projects/{name}`, and so on).
+6. After ingestion, briefly tell the user what you pulled (e.g., "Pulled 4 files: brand-guidelines.pdf, about-page.md, okrs-2026.md, team-roster.csv. 18 links fetched."). One sentence. Then move to Build.
 
-**If the user picks `No` or `Skip`**: proceed straight to Build with only the Q1–Q12 answers from Phase B.
+**If the user picks `No` or `Skip`**: go straight to Build with only the Q1–Q12 answers from Phase B.
 
 ---
 
 ## Phase B Build: Personalize the Vault
 
-After Q12 + the additional-context drop (or skips), build everything you can from what the user gave you. Work silently — don't narrate each step.
+After Q12 + the additional-context drop (or skips), build everything you can from what the user gave you. Work silently. Don't narrate each step.
 
 ### CRITICAL: real personalization, not template scaffolds
 
-The reference files in `references/` are **scaffolds** — they show the section structure to use. They are **not** the output. Do not copy a template verbatim with placeholders intact.
+The reference files in `references/` are **scaffolds**. They show the section structure to use. They are **not** the output. Do not copy a template verbatim with placeholders still in it.
 
 For every file you write:
 
 1. **Read the reference template** to learn the section structure (headings, frontmatter shape, section order).
-2. **Replace every placeholder** (anything in `[brackets]` or marked as TBD) with real data extracted from the 12 Phase B answers + the Phase B+ corpus.
-3. **If a section has zero supporting data** after exhausting both Q answers and the corpus: **omit the entire section** rather than writing `[name]` or `TBD`. The output should never contain bracketed placeholders.
+2. **Replace every placeholder** (anything in `[brackets]` or marked as TBD) with real data from the 12 Phase B answers + the Phase B+ corpus.
+3. **If a section has zero supporting data** after exhausting both the Q answers and the corpus: **omit the whole section** rather than write `[name]` or `TBD`. The output should never contain bracketed placeholders.
 4. **If only some bullets in a section have data**: keep the section, drop the empty bullets.
-5. **Use the user's actual words, names, numbers, URLs, and quotes** wherever the corpus contains them. Don't paraphrase facts — preserve specificity (exact company names, exact dollar figures, exact dates, exact phrases the user uses).
-6. **Cross-reference**: a single fact may belong in multiple files (e.g., "we sell to RevOps leaders at Series B SaaS" belongs in both `icp.md` and `brand.md` positioning). Place it in each file where it's relevant.
+5. **Use the user's actual words, names, numbers, URLs, and quotes** wherever the corpus has them. Don't paraphrase facts. Keep the specifics (exact company names, exact dollar figures, exact dates, exact phrases the user uses).
+6. **Cross-reference**: a single fact can belong in multiple files (e.g., "we sell to RevOps leaders at Series B SaaS" belongs in both `icp.md` and `brand.md` positioning). Put it in each file where it's relevant.
 7. **Frontmatter `updated:`** = today's date.
 
-A finished context file should read as a real human-written document about the user. If it reads like a fillable form, you did it wrong — go back and fill it.
+A finished context file should read like a real human-written document about the user. If it reads like a fillable form, you did it wrong. Go back and fill it.
 
 ### Build Step 1: Create Context Files
 
-Behavior depends on selected mode.
+Behavior depends on the chosen mode.
 
-For every file below, source data from BOTH the Q answers AND the Phase B+ corpus (uploaded files, fetched links, folder reads). The corpus typically contains the depth — Q answers are anchors.
+For every file below, pull data from BOTH the Q answers AND the Phase B+ corpus (uploaded files, fetched links, folder reads). The corpus usually holds the depth. The Q answers are anchors.
 
 **Solopreneurs/Professionals mode** (Q1–Q12 = solo brain-dump categories):
 
-- **`Context/me.md`** — Always created. Fill from Q1 (name, role, location, peer-intro line, attributes, working style) + Q2 (origin / POV / wedge / enemy) + Q12 (drains, unclosed loops) + corpus. Read `references/context-me.md` as scaffold.
-- **`Context/business.md`** — Only if Q3 had content. Fill from Q3 (revenue lines: name, what it does, who it's for, stage, baseline, origin) + corpus (About page, business overview docs). Read `references/context-business.md` as scaffold.
-- **`Context/services.md`** — Only if Q3 lists multiple revenue lines or corpus has product/service docs. Read `references/context-services.md` as scaffold.
-- **`Context/pain-points.md`** — Only if Q4 named problems or Q2 surfaced one. Include awareness column (aware vs needs education) using Q4's awareness signal. Read `references/context-pain-points.md` as scaffold.
-- **`Context/icp.md`** — Only if Q5 had content or corpus has ICP material. Fill role, day, language, dream outcome, trigger, decision time, media, examples. Read `references/context-icp.md` as scaffold.
-- **`Context/brand.md`** — Only if Q6 (voice), Q7 (positioning), or Q4 (why-pick-you) had content, or corpus has brand material. From Q4 take value prop + why-pick-you. From Q6 take voice descriptors, signature phrases, words-to-avoid, feeling, colors/fonts. From Q7 take enemy, differentiation, key messages. Read `references/context-brand.md` as scaffold.
-- **`Context/strategy.md`** — Only if Q8 had content. Fill priorities, why, and explicit nos. Read `references/context-strategy.md` as scaffold.
-- **`Context/team.md`** — Only if Q10 had content (people / collaborators) or corpus has a team / contractor list. Read `references/context-team.md` as scaffold.
-- **`Context/infrastructure.md`** — Only if Q11 (stack) or Q12 (workflows) had content, or corpus has a stack doc. Combine tool stack (Q11) + workflows-to-automate (Q12). Read `references/context-infrastructure.md` as scaffold.
+- **`Context/me.md`**: Always created. Fill from Q1 (name, role, location, peer-intro line, attributes, working style) + Q2 (origin / POV / wedge / enemy) + Q12 (drains, unclosed loops) + corpus. Read `references/context-me.md` as scaffold.
+- **`Context/business.md`**: Only if Q3 had content. Fill from Q3 (revenue lines: name, what it does, who it's for, stage, baseline, origin) + corpus (About page, business overview docs). Read `references/context-business.md` as scaffold.
+- **`Context/services.md`**: Only if Q3 lists multiple revenue lines or the corpus has product/service docs. Read `references/context-services.md` as scaffold.
+- **`Context/pain-points.md`**: Only if Q4 named problems or Q2 surfaced one. Include the awareness column (aware vs needs education) using Q4's awareness signal. Read `references/context-pain-points.md` as scaffold.
+- **`Context/icp.md`**: Only if Q5 had content or the corpus has ICP material. Fill role, day, language, dream outcome, trigger, decision time, media, examples. Read `references/context-icp.md` as scaffold.
+- **`Context/brand.md`**: Only if Q6 (voice), Q7 (positioning), or Q4 (why-pick-you) had content, or the corpus has brand material. From Q4 take value prop + why-pick-you. From Q6 take voice descriptors, signature phrases, words-to-avoid, feeling, colors/fonts. From Q7 take enemy, differentiation, key messages. Read `references/context-brand.md` as scaffold.
+- **`Context/strategy.md`**: Only if Q8 had content. Fill priorities, why, and explicit nos. Read `references/context-strategy.md` as scaffold.
+- **`Context/team.md`**: Only if Q10 had content (people / collaborators) or the corpus has a team / contractor list. Read `references/context-team.md` as scaffold.
+- **`Context/infrastructure.md`**: Only if Q11 (stack) or Q12 (workflows) had content, or the corpus has a stack doc. Combine the tool stack (Q11) + workflows-to-automate (Q12). Read `references/context-infrastructure.md` as scaffold.
 
 **Business mode** (Q1–Q12 = business brain-dump categories):
 
-- **`Context/operator.md`** — Always created. Fill from Q1 (name, title, reports-to, decision authority, working style, drains) + corpus. Read `references/context-operator.md` as scaffold.
-- **`Context/organization.md`** — Always created. Fill from Q2 (legal name, industry, stage, founded year, headcount, HQ, mission, origin, POV) + corpus (About page, company deck). Read `references/context-organization.md` as scaffold.
-- **`Context/market.md`** — Only if Q3 had content or corpus has market / industry material. Fill industry, niche, trends, what's broken, last 5–10y shifts, main players. Read `references/context-market.md` as scaffold.
-- **`Context/services.md`** — Only if Q4 had content. Fill revenue lines from Q4 + corpus (sales deck, product pages). Read `references/context-services.md` as scaffold.
-- **`Context/pain-points.md`** — Only if Q5 surfaced problems or corpus has them. Include awareness signal from Q5. Read `references/context-pain-points.md` as scaffold.
-- **`Context/icp.md`** — Only if Q6 had content or corpus has ICP material. Fill role, day, language, dream outcome, trigger, decision time, market trends, media, examples. Read `references/context-icp.md` as scaffold.
-- **`Context/brand.md`** — Only if Q7 (voice) or Q8 (positioning) had content or corpus has brand material. From Q7 take tagline, voice descriptors, signature phrases, words-to-avoid, topics, colors/fonts, feeling. From Q8 take enemy, differentiation, personality adjectives, big concept, key messages. Read `references/context-brand.md` as scaffold.
-- **`Context/team.md`** — Always created. Fill from Q9 (departments + leads, team members) + corpus (org chart). Read `references/context-team.md` as scaffold.
-- **`Context/strategy.md`** — Always created. Fill from Q10 (objectives, KRs, owners, why, explicit nos) + corpus (OKR doc). Read `references/context-strategy-business.md` as scaffold.
-- **`Context/infrastructure.md`** — Only if Q12 listed tools or workflows, or corpus has a stack / SOPs doc. Combine tool stack + sources of truth + workflows-to-automate from Q12. Read `references/context-infrastructure.md` as scaffold.
-- **`Context/stakeholders.md`** — Only if Q12 mentioned external stakeholders or corpus has investor / partner / client lists. Read `references/context-stakeholders.md` as scaffold.
+- **`Context/operator.md`**: Always created. Fill from Q1 (name, title, reports-to, decision authority, working style, drains) + corpus. Read `references/context-operator.md` as scaffold.
+- **`Context/organization.md`**: Always created. Fill from Q2 (legal name, industry, stage, founded year, headcount, HQ, mission, origin, POV) + corpus (About page, company deck). Read `references/context-organization.md` as scaffold.
+- **`Context/market.md`**: Only if Q3 had content or the corpus has market / industry material. Fill industry, niche, trends, what's broken, last 5–10y shifts, main players. Read `references/context-market.md` as scaffold.
+- **`Context/services.md`**: Only if Q4 had content. Fill revenue lines from Q4 + corpus (sales deck, product pages). Read `references/context-services.md` as scaffold.
+- **`Context/pain-points.md`**: Only if Q5 surfaced problems or the corpus has them. Include the awareness signal from Q5. Read `references/context-pain-points.md` as scaffold.
+- **`Context/icp.md`**: Only if Q6 had content or the corpus has ICP material. Fill role, day, language, dream outcome, trigger, decision time, market trends, media, examples. Read `references/context-icp.md` as scaffold.
+- **`Context/brand.md`**: Only if Q7 (voice) or Q8 (positioning) had content or the corpus has brand material. From Q7 take tagline, voice descriptors, signature phrases, words-to-avoid, topics, colors/fonts, feeling. From Q8 take enemy, differentiation, personality adjectives, big concept, key messages. Read `references/context-brand.md` as scaffold.
+- **`Context/team.md`**: Always created. Fill from Q9 (departments + leads, team members) + corpus (org chart). Read `references/context-team.md` as scaffold.
+- **`Context/strategy.md`**: Always created. Fill from Q10 (objectives, KRs, owners, why, explicit nos) + corpus (OKR doc). Read `references/context-strategy-business.md` as scaffold.
+- **`Context/infrastructure.md`**: Only if Q12 listed tools or workflows, or the corpus has a stack / SOPs doc. Combine tool stack + sources of truth + workflows-to-automate from Q12. Read `references/context-infrastructure.md` as scaffold.
+- **`Context/stakeholders.md`**: Only if Q12 mentioned external stakeholders or the corpus has investor / partner / client lists. Read `references/context-stakeholders.md` as scaffold.
 
 ### Build Step 2: Create Project Folders
 
-Solo: from Q9 (active projects). Business: from Q11 (active projects / initiatives). Plus any project briefs / Notion exports / project lists in the corpus. Intelligently structure each project based on what the user gave you.
+Solo: from Q9 (active projects). Business: from Q11 (active projects / initiatives). Plus any project briefs / Notion exports / project lists in the corpus. Structure each project by what the user gave you.
 
-**Analyze the info and decide the right structure:**
+**Read the info and decide the right structure:**
 - Simple mention ("working on a podcast") → just a `README.md`
 - Moderate detail (scope, deadlines, people) → `README.md` + relevant subdirs
 - Rich info (briefs, specs, research, multiple workstreams) → full structure with subdirs and files
@@ -671,15 +672,15 @@ updated: YYYY-MM-DD
 [What needs to happen]
 ```
 
-Don't create empty subdirs. Don't cram everything into the README. Distribute content into the right files based on what it actually is.
+Don't create empty subdirs. Don't cram everything into the README. Distribute content into the right files by what it actually is.
 
-**Business mode only** — from Q9 + corpus, also create `Departments/{name}/README.md` for each department with the lead's name, charter placeholder, and `sops/` subfolder.
+**Business mode only**: from Q9 + corpus, also create `Departments/{name}/README.md` for each department with the lead's name, a charter placeholder, and a `sops/` subfolder.
 
 ### Build Step 3: Profile-First Team Scaffolding (Business mode only)
 
 From Q9 + corpus (org chart, team roster), scaffold each person's profile workspace. Slug names are kebab-case.
 
-`{org-slug}` is derived from Q2 (company name → kebab-case). If no company name given, default to `team`.
+`{org-slug}` comes from Q2 (company name → kebab-case). If no company name is given, default to `team`.
 
 For each FT employee:
 ```bash
@@ -702,8 +703,8 @@ If Q9 + corpus list no team members, don't scaffold anything under `Team/{org-sl
 ### Build Step 4: Mode-specific Additional Setup
 
 **Business mode only:**
-- If Q12 or corpus mentioned org-wide processes / SOPs, capture them in `Intelligence/processes/{name}.md`
-- If user provided onboarding docs in the corpus, route them to `Onboarding/{name}.md`
+- If Q12 or the corpus mentioned org-wide processes / SOPs, capture them in `Intelligence/processes/{name}.md`
+- If the user provided onboarding docs in the corpus, route them to `Onboarding/{name}.md`
 
 ### Build Step 5: Create First Daily Note
 
@@ -724,21 +725,21 @@ date: YYYY-MM-DD
 ### Build Step 6: Confirm Completion
 
 Tell the user:
-- Quick summary of what was created (which context files, how many projects, any departments, any team profiles)
+- A quick summary of what got created (which context files, how many projects, any departments, any team profiles)
 - "Open this folder in Obsidian to see your vault"
-- "You can add more context anytime — just tell me and I'll update the right files."
+- "You can add more context anytime. Just tell me and I'll update the right files."
 - Suggest a next action based on what they told you
 
 ## Guidelines
 
-- Phase 0 is one question — mode selection
-- Phase A is fully automated — no user input needed
-- Phase B is **12 categories** (Oskar's structure), batched into **3 rich-HTML forms** rendered via `mcp__visualize__show_widget` (Cowork-only). Each form has 4 stacked categories with title, bullet inspiration, and a single free-text textarea per category. It's a guided **brain dump**, not a Q&A box. The bullets are inspiration, not strict asks. Always recommend Whisper / dictation + pasting docs / links / file paths into the textarea
+- Phase 0 is one question: mode selection
+- Phase A is fully automated: no user input needed
+- Phase B is **12 categories**, batched into **3 rich-HTML forms** rendered via `mcp__visualize__show_widget` (Cowork-only). Each form has 4 stacked categories with a title, bullet inspiration, and a single free-text textarea per category. It's a guided **brain dump**, not a Q&A box. The bullets are inspiration, not strict asks. Always recommend Whisper / dictation + pasting docs / links / file paths into the textarea
 - No follow-ups, no drilling deeper between forms
-- Phase B+ is one final AskUserQuestion (or visualize widget) inviting any leftover files / links / folders — always ask, even if Forms 1–3 looked rich
+- Phase B+ is one final AskUserQuestion (or visualize widget) inviting any leftover files / links / folders. Always ask, even if Forms 1–3 looked rich
 - Accept any format: typed brain dumps, Whisper transcripts, pasted docs, uploaded files, links (LinkedIn, websites, blog posts, Notion, Drive), local folder paths, or skips
 - For every link the user pastes, fetch it (`WebFetch` / `WebSearch`); for every file or folder, read it (`Read` / `Glob`); merge into a single context corpus before building
-- **Templates are scaffolds, not outputs.** Replace every `[bracketed placeholder]` with real user data. If a section has no data after exhausting Q answers + corpus, omit the section — never leave placeholders in the written file
-- Preserve specificity: use the user's exact names, numbers, URLs, and phrasing
-- Only create context files that have real content — don't create empty placeholder files
-- Don't narrate every file you're creating — just build it and summarize at the end
+- **Templates are scaffolds, not outputs.** Replace every `[bracketed placeholder]` with real user data. If a section has no data after exhausting the Q answers + corpus, omit the section. Never leave placeholders in the written file
+- Keep the specifics: use the user's exact names, numbers, URLs, and phrasing
+- Only create context files that have real content. Don't create empty placeholder files
+- Don't narrate every file you're creating. Just build it and summarize at the end

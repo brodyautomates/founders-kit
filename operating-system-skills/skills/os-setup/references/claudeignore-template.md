@@ -1,4 +1,4 @@
-# Privacy: Files and folders Claude should NOT read or access
+# Privacy: files and folders Claude should NOT read or access
 # Add paths here for sensitive content
 
 # Credentials and secrets

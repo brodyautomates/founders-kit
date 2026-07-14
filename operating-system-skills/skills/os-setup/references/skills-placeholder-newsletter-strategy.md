@@ -3,7 +3,7 @@ type: skill-reference
 skill: newsletter-writer
 ---
 
-# Newsletter Writer — Strategy
+# Newsletter Writer: Strategy
 
 ## Newsletter Name
 
@@ -15,7 +15,7 @@ skill: newsletter-writer
 
 ## Format
 
-<!-- Describe the typical structure. Examples: intro + 3 links + closing, deep-dive essay, curated roundup, interview-style Q&A. -->
+<!-- Describe the typical structure. For example: intro + 3 links + closing, deep-dive essay, curated roundup, interview-style Q&A. -->
 
 ## Cadence
 
@@ -23,4 +23,4 @@ skill: newsletter-writer
 
 ## Tone
 
-<!-- How should the newsletter sound? Examples: casual and witty, professional and insightful, brief and punchy. -->
+<!-- How should the newsletter sound? For example: casual and witty, professional and insightful, brief and punchy. -->

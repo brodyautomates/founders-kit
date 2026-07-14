@@ -10,7 +10,7 @@ Departments/{dept-name}/
 
 ## Rules
 
-- When new department info emerges, create or update `Departments/{name}/README.md` with team, goals, and links to SOPs.
-- When a repeatable department-specific process is described, capture it as an SOP in `Departments/{name}/sops/{name}.md`.
+- When new department info shows up, create or update `Departments/{name}/README.md` with team, goals, and links to SOPs.
+- When someone describes a repeatable department-specific process, capture it as an SOP in `Departments/{name}/sops/{name}.md`.
 - Org-wide processes go to `Intelligence/processes/` instead, not here.
 - Include `department:` in frontmatter whenever a note relates to a specific department.

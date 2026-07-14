@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # Karpathy — LLM Wiki (April 2026)
 
 ## Contents
@@ -25,9 +27,9 @@
 
 ## Core thesis
 
-Traditional RAG forces the LLM to **rediscover knowledge from scratch on every query**. Each retrieval pulls raw chunks; the LLM then re-summarizes, re-connects, re-reasons. There's no accumulation.
+Traditional RAG makes the LLM **rediscover knowledge from scratch on every query**. Each retrieval pulls raw chunks, then the LLM re-summarizes, re-connects, and re-reasons over them. Nothing accumulates.
 
-Karpathy's LLM Wiki flips this: **pre-digest sources at ingest time** into a maintained, cross-linked markdown wiki the LLM owns. Knowledge is compiled once and kept current, not re-derived per query. At ~100 articles / 400,000+ words the entire wiki index fits within a modern LLM's context window — enabling duplicate detection and contradiction checking without any retrieval system.
+Karpathy's LLM Wiki turns that around: **pre-digest sources at ingest time** into a maintained, cross-linked markdown wiki that the LLM owns. Knowledge gets compiled once and kept current instead of re-derived per query. At around 100 articles / 400,000+ words the whole wiki index fits inside a modern LLM's context window, which makes duplicate detection and contradiction checking possible without any retrieval system at all.
 
 > *"the LLM is rediscovering knowledge from scratch on every question. There's no accumulation."*
 
@@ -35,9 +37,9 @@ Karpathy's LLM Wiki flips this: **pre-digest sources at ingest time** into a mai
 
 ## Why humans abandon wikis but LLMs don't
 
-Humans abandon wikis because the maintenance burden outpaces the value. Cross-references rot, summaries go stale, edits propagate inconsistently. Wikipedia survives because of millions of contributors; private wikis die quietly.
+Humans walk away from wikis because the upkeep costs more than the value returns. Cross-references rot, summaries go stale, edits land inconsistently. Wikipedia survives on millions of contributors. Private wikis die quietly.
 
-LLMs don't have this problem:
+LLMs don't carry this problem:
 
 - **Don't get bored** — maintenance is the same task whether it's Tuesday morning or 11pm
 - **Don't forget cross-references** — they can scan the whole index in one pass
@@ -54,14 +56,14 @@ LLMs don't have this problem:
 | **The Wiki** | LLM-generated markdown organized by content type: summaries, entity pages, concept pages, comparisons, syntheses | **LLM owns this layer entirely.** |
 | **The Schema (e.g., CLAUDE.md)** | Config doc that *"tells the LLM how the wiki is structured, what the conventions are, and what workflows to follow"* | Human-maintained. Read by LLM every operation. |
 
-The schema layer is what makes the system work. It defines:
+The schema layer is the piece that holds the whole system together. It sets:
 - How wiki pages are named
 - Which folder gets which content type
 - What ingest looks like
 - What query looks like
 - What lint looks like
 
-In an Obsidian-based vault: the **schema = root CLAUDE.md + per-folder CLAUDE.md files**. Same architecture, different name.
+In an Obsidian-based vault the **schema = root CLAUDE.md + per-folder CLAUDE.md files**. Same architecture, different name.
 
 ## Three operations
 
@@ -75,29 +77,29 @@ In an Obsidian-based vault: the **schema = root CLAUDE.md + per-folder CLAUDE.md
 
 When a new source enters the system:
 
-1. **Read the source.** Full read, not just abstract.
-2. **Discuss takeaways with the user.** What's actually important here? What surprised us? What contradicts what we already have?
-3. **Write a summary page.** New file in the wiki named per the schema.
+1. **Read the source.** Full read, not just the abstract.
+2. **Discuss takeaways with the user.** What actually matters here? What surprised us? What contradicts what we already hold?
+3. **Write a summary page.** New file in the wiki, named per the schema.
 4. **Update the index.** Add the new entry to whatever index pages reference this content type.
-5. **Revise relevant entity pages.** If the source mentions a person, project, or concept the wiki already has a page for — update those pages with the new information and link back.
-6. **Revise relevant concept pages.** Same as above for ideas/concepts.
-7. **Append to the ingest log.** Audit trail: what was ingested, when, which pages were touched.
+5. **Revise relevant entity pages.** If the source names a person, project, or concept the wiki already tracks, update those pages with the new information and link back.
+6. **Revise relevant concept pages.** Same move for ideas and concepts.
+7. **Append to the ingest log.** Audit trail: what got ingested, when, and which pages were touched.
 
-**One source typically touches 10–15 wiki pages.** If a source produces only one page, it wasn't fully digested.
+**One source usually touches 10–15 wiki pages.** If a source produces a single page, it was not fully digested.
 
 ## Query — the canonical flow
 
 When the user asks a question:
 
 1. **Search wiki pages, not raw sources.** The wiki is already pre-digested.
-2. **Synthesize an answer with citations.** Each claim links back to the wiki page that supports it.
-3. **If the query reveals a gap or new connection** — file it back into the wiki as a new page or amendment. Knowledge compounds: tomorrow's queries get better because today's exploration was captured.
+2. **Synthesize an answer with citations.** Each claim links back to the wiki page that backs it.
+3. **If the query exposes a gap or a new connection**, file it back into the wiki as a new page or an amendment. Knowledge compounds: tomorrow's queries improve because today's exploration got captured.
 
-This last step is critical. Queries are not throwaway. They're how the wiki grows organically.
+That last step carries the whole idea. Queries are not throwaway. They are how the wiki grows on its own.
 
 ## Lint — what it specifically catches
 
-The lint operation is a periodic health check. Karpathy's gist names these failure modes explicitly:
+Lint is a periodic health check. Karpathy's gist names these failure modes directly:
 
 | Failure mode | What it looks like |
 |---|---|
@@ -154,15 +156,15 @@ In a vault built on this pattern, the root CLAUDE.md is the schema doc.
 
 ## The 10–15 page fan-out
 
-The most operational rule from the gist: **one ingest typically touches 10–15 wiki pages.** This is not an arbitrary number — it's what "thorough digestion" looks like in practice.
+The most operational rule from the gist: **one ingest usually touches 10–15 wiki pages.** That number is not arbitrary. It is what "thorough digestion" actually looks like in practice.
 
-If your ingest skill or workflow only writes one summary file per source:
+When your ingest skill or workflow writes only one summary file per source:
 
 - The source was **not fully digested**
 - Future queries will miss the context
 - The wiki won't compound
 
-What fan-out looks like for a meeting transcript:
+Here is what fan-out looks like for a meeting transcript:
 
 1. New file: `meetings/team-standups/2026-04-30.md` (the summary)
 2. Update: each attendee's profile page with action items
@@ -172,7 +174,7 @@ What fan-out looks like for a meeting transcript:
 6. New: a decision record if a decision was made
 7. Update: the schema's "active topics" list if a new topic surfaced
 
-Easily 10+ touches.
+That reaches 10+ touches without effort.
 
 ## Human owns vs LLM owns
 
@@ -185,28 +187,28 @@ Easily 10+ touches.
 | Resolving contradictions when surfaced | Flagging contradictions |
 | Curating ingest log | Appending to ingest log |
 
-The human's job is **direction**. The LLM's job is **maintenance**. This is exactly why humans abandon wikis (they hate maintenance) and why LLMs make wikis viable.
+The human's job is **direction**. The LLM's job is **maintenance**. That split is the whole reason humans abandon wikis (they hate maintenance) and the reason LLMs make wikis workable.
 
 ## Dos
 
 - Pre-digest at ingest, not at query.
-- Maintain the schema doc / CLAUDE.md religiously — it's the constitution.
-- Run lint periodically (this skill is one).
+- Keep the schema doc / CLAUDE.md tight and current. It's the constitution.
+- Run lint on a schedule (this skill is one).
 - File query findings back into the wiki.
 - Touch 10–15 pages per ingestion.
-- Use the wiki for cumulative knowledge; reserve raw sources as immutable canon.
-- When a source contradicts an existing page, link the new page → the old, mark the old as superseded.
-- When a query surfaces a new connection, write a new wiki page or amendment.
-- Use the Lint operation as a recurring chore, not a one-shot.
+- Use the wiki for cumulative knowledge; keep raw sources as immutable canon.
+- When a source contradicts an existing page, link the new page → the old and mark the old as superseded.
+- When a query surfaces a new connection, write a new wiki page or an amendment.
+- Treat the Lint operation as a recurring chore, not a one-shot.
 
 ## Don'ts
 
 - Don't let RAG re-derive everything per query.
 - Don't allow orphan pages — every wiki page needs at least one inbound link.
-- Don't let stale claims live next to current ones without linking the supersession.
-- Don't ingest a source and only write a single summary — propagate to entities/concepts.
+- Don't let stale claims sit next to current ones without linking the supersession.
+- Don't ingest a source and write only a single summary — propagate to entities and concepts.
 - Don't modify raw sources.
-- Don't let humans do the maintenance — LLMs are better at it.
+- Don't hand the maintenance to humans — LLMs do it better.
 - Don't skip the schema doc. Without it, the wiki drifts into folders nobody can find.
 
 ## Verbatim quotes
@@ -237,11 +239,11 @@ From Nate B Jones, "Karpathy's Wiki vs. Open Brain" (2026-04-22):
 
 - The wiki approach is **great for connections and synthesis**, but **fragile when you need exact retrieval from structured data**.
 - Pair it with a graph database or relational store when querying tabular data (catalogs, customer records, financial transactions).
-- The wiki is a brain layer. Don't put data that needs aggregation, filtering, or transactional integrity in markdown.
+- The wiki is a brain layer. Keep data that needs aggregation, filtering, or transactional integrity out of markdown.
 
-This is why Cole Medin's `agentic-rag-knowledge-graph` and similar hybrid stacks exist: markdown for narrative + Postgres/Neo4j for structured data + MCP server as the unified interface.
+This is the reason Cole Medin's `agentic-rag-knowledge-graph` and similar hybrid stacks exist: markdown for narrative + Postgres/Neo4j for structured data + MCP server as the unified interface.
 
-The vault audit doesn't enforce this boundary — it's an architectural decision per project — but the skill **does** flag when long structured data appears in markdown (Pass 4 / Pass 9).
+The vault audit does not enforce this boundary. That is an architectural decision per project. What the skill **does** do is flag when long structured data shows up in markdown (Pass 4 / Pass 9).
 
 ## Sources
 

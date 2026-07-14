@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # Anthropic — CLAUDE.md best practices
 
 ## Contents
@@ -26,9 +28,9 @@
 
 ## Core thesis
 
-CLAUDE.md is loaded as a **user message at the start of every session** — not as part of the system prompt. Claude reads it and tries to follow it, but there is **no guarantee of strict compliance**, especially for vague or conflicting instructions. The right CLAUDE.md is the smallest concrete set of instructions that survives the pruning test.
+CLAUDE.md arrives as a **user message at the start of every session**, not as part of the system prompt. Claude reads it and does its best to follow it, but you get **no guarantee of strict compliance**, and that is most true for rules that are vague or that fight each other. The CLAUDE.md you want is the smallest set of concrete instructions that still passes the pruning test.
 
-Anthropic's framing of context engineering puts it bluntly: *"finding the smallest possible set of high-signal tokens that maximizes the likelihood of some desired outcome."* CLAUDE.md is the same problem applied to your project's instruction layer.
+Anthropic frames context engineering directly: *"finding the smallest possible set of high-signal tokens that maximizes the likelihood of some desired outcome."* CLAUDE.md is that same problem, pointed at the instruction layer of your project.
 
 ## Hard rules
 
@@ -50,17 +52,17 @@ Anthropic's framing of context engineering puts it bluntly: *"finding the smalle
 
 ## The pruning test
 
-For every line in CLAUDE.md, ask:
+Take every line in CLAUDE.md and put one question to it:
 
 > **"Would removing this cause Claude to make mistakes? If not, cut it."**
 
-Apply ruthlessly. The mistake most teams make is the opposite — they keep adding lines hoping more guidance helps. Beyond ~200 lines, the marginal line **subtracts** signal because Claude's adherence to the whole file degrades.
+Be ruthless about it. Most teams do the reverse. They keep piling on lines, hoping that more guidance lands as more control. Past roughly 200 lines the next line **costs** you signal, because Claude's grip on the whole file loosens as it grows.
 
 > *"If Claude keeps doing something you don't want despite having a rule against it, the file is probably too long and the rule is getting lost."*
 
 ## CLAUDE.md hierarchy and precedence
 
-All discovered files **concatenate** (do not override). More specific scopes win when conflicts arise. Files walk up the directory tree from the working directory.
+Every file that gets discovered is **concatenated**, none overrides another. When two rules collide, the more specific scope takes it. Discovery walks up the directory tree starting from your working directory.
 
 | Scope | Path (default) | Shared with | Notes |
 |---|---|---|---|
@@ -73,12 +75,12 @@ All discovered files **concatenate** (do not override). More specific scopes win
 
 ### Monorepo behavior
 
-If you run Claude Code in `root/foo/`:
-- `root/foo/CLAUDE.md` is loaded (cwd)
-- `root/CLAUDE.md` is also loaded (parent walk)
-- If Claude reads files in `root/foo/bar/`, then `root/foo/bar/CLAUDE.md` loads on demand
+Say you launch Claude Code inside `root/foo/`:
+- `root/foo/CLAUDE.md` loads (the cwd)
+- `root/CLAUDE.md` loads too (the parent walk)
+- When Claude opens files in `root/foo/bar/`, `root/foo/bar/CLAUDE.md` loads on demand
 
-This lets the monorepo root apply rules across all subprojects while each subproject adds its own.
+That setup lets the monorepo root push rules down across every subproject while each subproject layers its own on top.
 
 ## The three core building blocks every CLAUDE.md needs
 
@@ -86,7 +88,7 @@ Source: camelCase, "Stop Writing Bad CLAUDE.md Files." Backed by Anthropic's spe
 
 ### 1. One-liner describing the project
 
-A single sentence that gives Claude the framework, language, audience, and domain.
+A single sentence that hands Claude the framework, the language, the audience, and the domain.
 
 ✅ Good:
 - *"This is our customer-facing payment portal built with Next.js 15 and Stripe."*
@@ -99,7 +101,7 @@ A single sentence that gives Claude the framework, language, audience, and domai
 
 ### 2. Key bash commands
 
-The commands Claude can't guess and that get used in **daily** work.
+The commands Claude can't guess on its own and that show up in **daily** work.
 
 ✅ Good:
 - `npm run build` — builds the production bundle
@@ -112,7 +114,7 @@ The commands Claude can't guess and that get used in **daily** work.
 
 ### 3. Caveats — non-obvious project warnings
 
-Things not visible from the code but that will trip Claude up.
+The things the code won't reveal on its own, the ones that will trip Claude up.
 
 ✅ Good:
 - *"Never modify `schema.prisma` directly — run `npm run db:generate` instead."*
@@ -126,7 +128,7 @@ Things not visible from the code but that will trip Claude up.
 
 ## Specificity beats vagueness — examples
 
-Specific rules earn ~89% compliance. Vague ones drop to ~35%. Anthropic's documented examples:
+Specific rules pull around 89% compliance. Vague ones fall to about 35%. Here are Anthropic's documented examples:
 
 | ❌ Vague (low compliance) | ✅ Specific (high compliance) |
 |---|---|
@@ -139,7 +141,7 @@ Specific rules earn ~89% compliance. Vague ones drop to ~35%. Anthropic's docume
 
 ## Path-scoped rules in `.claude/rules/`
 
-For larger projects, break instructions into topic-specific files in `.claude/rules/`. Each `.md` file covers one topic. Rules are scoped to file paths via YAML frontmatter:
+On a bigger project, split your instructions into topic files inside `.claude/rules/`. One `.md` file per topic. You scope each set of rules to file paths through YAML frontmatter:
 
 ```yaml
 ---
@@ -155,16 +157,16 @@ paths:
 - Use the shared logger from `src/lib/logger.ts`.
 ```
 
-Files **without** `paths:` frontmatter load unconditionally at launch (acts like a CLAUDE.md). Files **with** `paths:` only load when Claude reads files matching the glob — true progressive disclosure.
+Files that have **no** `paths:` frontmatter load unconditionally at launch, so they behave like a CLAUDE.md. Files that **do** carry `paths:` load only when Claude reads files that match the glob, which is progressive disclosure done right.
 
-This is the right place for code style rules, testing conventions, security patterns. **Move them out of CLAUDE.md.**
+This is where code style rules, testing conventions, and security patterns belong. **Move them out of CLAUDE.md.**
 
 ## The `@import` pattern
 
 Syntax: `@path/to/file.md` inside a CLAUDE.md.
 
 - Relative paths resolve **relative to the importing file**.
-- Maximum recursion depth: **5 hops**. Beyond that the import is dropped.
+- Maximum recursion depth: **5 hops**. Anything past that gets dropped.
 - Imported content **fully loads** at launch — imports don't save tokens, only organize.
 
 Use case: shared rules across multiple repos.
@@ -181,7 +183,7 @@ Use case: shared rules across multiple repos.
 
 ## `claudeMdExcludes` and managed policy
 
-In `.claude/settings.local.json` you can skip ancestor CLAUDE.md files by glob:
+Inside `.claude/settings.local.json` you can skip ancestor CLAUDE.md files by glob:
 
 ```json
 {
@@ -191,13 +193,13 @@ In `.claude/settings.local.json` you can skip ancestor CLAUDE.md files by glob:
 }
 ```
 
-Useful when you're inside a giant org monorepo and most ancestor CLAUDE.md content is irrelevant noise.
+Handy when you're deep inside a giant org monorepo and most of the ancestor CLAUDE.md content is just noise.
 
-**Managed policy CLAUDE.md cannot be excluded.** Org-wide rules always apply. This is intentional — security/compliance rules can't be disabled by a developer.
+**Managed policy CLAUDE.md cannot be excluded.** Org-wide rules apply no matter what. That is deliberate: a developer should not be able to switch off security and compliance rules.
 
 ## Position effect — why ordering matters
 
-LLMs over-attend to **the start and end** of a prompt and under-attend to **the middle**. This is a structural property of transformer attention, documented in multiple studies.
+LLMs over-attend to **the start and end** of a prompt and under-attend to **the middle**. This comes from how transformer attention is built, and multiple studies document it.
 
 For CLAUDE.md:
 - Put the **most important rules at the top**.
@@ -205,15 +207,15 @@ For CLAUDE.md:
 - Put **edge cases and lower-priority guidance** in the middle (or move to `.claude/rules/`).
 - The very end is also a high-attention zone — use it for `IMPORTANT` final reminders.
 
-Anthropic's own system reminder is suggestive:
+Anthropic's own system reminder points the same direction:
 
 > *"important: This context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task."*
 
-The model is *told* CLAUDE.md content might be irrelevant. Vague or middle-buried rules get treated as background noise. **Specificity and position overcome this.**
+The model is literally *told* the CLAUDE.md content might not matter. So vague rules and rules buried in the middle get read as background noise. **Specificity and position are how you beat that.**
 
 ## Emphasis markers
 
-Anthropic confirms emphasis markers improve adherence for critical rules:
+Anthropic confirms that emphasis markers raise adherence on the rules that count:
 
 - `IMPORTANT:`
 - `YOU MUST`
@@ -221,7 +223,7 @@ Anthropic confirms emphasis markers improve adherence for critical rules:
 - ALL CAPS for the rule itself
 - Exclamation marks (sparingly)
 
-Reserve these for the rules where failure is genuinely costly. If everything is `IMPORTANT`, nothing is.
+Save these for the rules where a miss actually costs you. Mark everything `IMPORTANT` and none of it reads as important.
 
 ## The `MEMORY.md` system
 
@@ -229,59 +231,59 @@ Auto-memory at `~/.claude/projects/<project>/memory/`:
 
 - `MEMORY.md` is the index. **First 200 lines or 25KB** — whichever first — loads at startup.
 - Topic files in the same directory load on demand.
-- Claude decides what's worth remembering based on future usefulness.
+- Claude judges what is worth keeping by how useful it looks for later.
 - Memory is machine-local and shared across worktrees of the same git repo.
 
-Treat `MEMORY.md` like CLAUDE.md: prune aggressively, keep entries specific.
+Handle `MEMORY.md` the way you handle CLAUDE.md: prune hard, keep every entry specific.
 
 ## Compaction behavior
 
-When `/compact` runs:
+Here is what happens on `/compact`:
 
-- The **project-root CLAUDE.md is re-injected** automatically. Your rules survive.
-- **Nested CLAUDE.md is not re-injected.** If subdirectory rules mattered for the conversation, they're gone after compaction.
-- Customize compaction by adding to CLAUDE.md: *"When compacting, always preserve the full list of modified files and any test commands."*
+- The **project-root CLAUDE.md is re-injected** automatically. Your rules make it through.
+- **Nested CLAUDE.md is not re-injected.** Whatever subdirectory rules mattered during the conversation are gone once compaction runs.
+- You can shape compaction from CLAUDE.md itself: *"When compacting, always preserve the full list of modified files and any test commands."*
 
 ## HTML comments are stripped
 
-Block-level HTML comments are removed from the context injection:
+Block-level HTML comments get pulled out before the context injection:
 
 ```markdown
 <!-- This note is for the human maintainer only.
      Claude never sees it. -->
 ```
 
-Use this for maintainer notes, audit trail, "why this rule exists" history — without spending tokens. Code-block comments (inside ` ``` ` fences) are **preserved**.
+Use that for maintainer notes, an audit trail, or the "why this rule exists" history, all without spending tokens. Comments inside ` ``` ` code fences are **preserved**.
 
 ## Dos
 
-- Run `/init` only as a starting point — then prune aggressively. AI-generated CLAUDE.md is verbose by default.
-- Treat CLAUDE.md like code: review it when things go wrong, prune regularly, test changes by observing behavior.
-- Use markdown headers and bullets to group related instructions for readability.
-- Use `IMPORTANT` / `YOU MUST` for the rules where failure is costly.
-- Move multi-step procedures into Skills.
-- Move path-specific rules into `.claude/rules/` with `paths:` frontmatter.
-- Add to CLAUDE.md when Claude makes the same mistake **twice**.
-- Place the most important rules at the **top** of the file.
-- Schedule monthly audits — CLAUDE.md is a living document, code drifts, rules go stale.
-- Use `<!-- HTML comments -->` for maintainer notes that don't spend tokens.
-- Use the Anthropic GitHub integration to ask Claude to update CLAUDE.md from PR observations.
+- Run `/init` only to get a starting point — then prune hard. AI-generated CLAUDE.md is verbose out of the box.
+- Treat CLAUDE.md like code: review it when things break, prune it on a schedule, and test changes by watching behavior.
+- Group related instructions with markdown headers and bullets so the file reads cleanly.
+- Reserve `IMPORTANT` / `YOU MUST` for the rules where a miss is costly.
+- Push multi-step procedures into Skills.
+- Push path-specific rules into `.claude/rules/` with `paths:` frontmatter.
+- Add a rule to CLAUDE.md once Claude makes the same mistake **twice**.
+- Keep the most important rules at the **top** of the file.
+- Book monthly audits — CLAUDE.md is a living document, code drifts, and rules go stale.
+- Use `<!-- HTML comments -->` for maintainer notes that cost no tokens.
+- Use the Anthropic GitHub integration to have Claude update CLAUDE.md from what it sees in PRs.
 
 ## Don'ts
 
-- Don't include code style rules (`use 2 spaces`, `single quotes`). Use linters and formatters with the `post tool use` hook.
-- Don't include anything Claude can figure out by reading code.
-- Don't include standard language conventions Claude already knows.
-- Don't include detailed API documentation — link to the docs instead.
-- Don't include information that changes frequently (deploy URLs, current sprint, who's on call).
+- Don't include code style rules (`use 2 spaces`, `single quotes`). Push that to linters and formatters via the `post tool use` hook.
+- Don't include anything Claude can work out by reading the code.
+- Don't restate standard language conventions Claude already knows.
+- Don't paste detailed API documentation — link to the docs instead.
+- Don't include anything that changes often (deploy URLs, the current sprint, who's on call).
 - Don't include long explanations or tutorials.
 - Don't include file-by-file descriptions of the codebase.
 - Don't include self-evident practices ("write clean code", "follow best practices", "be careful").
-- Don't put a `# Title` heading that duplicates the filename.
-- Don't rely on `@imports` to "save tokens" — they don't.
-- Don't let CLAUDE.md drift past 200 lines without splitting into Skills, `.claude/rules/`, or imports.
-- Don't put generic warnings — be specific about what fails and how.
-- Don't write rules that conflict with each other; resolve them or one will be picked arbitrarily.
+- Don't add a `# Title` heading that just repeats the filename.
+- Don't lean on `@imports` to "save tokens" — they don't.
+- Don't let CLAUDE.md creep past 200 lines without splitting into Skills, `.claude/rules/`, or imports.
+- Don't leave generic warnings in — say exactly what fails and how.
+- Don't write rules that fight each other; settle them or one gets picked arbitrarily.
 
 ## Verbatim quotes worth preserving
 
@@ -295,19 +297,19 @@ Use this for maintainer notes, audit trail, "why this rule exists" history — w
 
 ## Auditable signals
 
-When this skill runs Pass 1 (size check) and Pass 2 (pruning) for CLAUDE.md files, look for:
+When this skill runs Pass 1 (size check) and Pass 2 (pruning) against CLAUDE.md files, watch for:
 
 - **Total line count** per CLAUDE.md (>200 = warn, >300 = fail).
-- **Vague rules**: rules that don't include a concrete value, command, file path, or quantifiable threshold. Heuristic: rule contains `properly`, `correctly`, `clean`, `good`, `appropriate` — flag for review.
-- **Code-style rules**: detect `\b(use|prefer)\s+\d+\s+(space|tab)`, single-quote rules, formatting opinions. Suggest moving to linter config + `.claude/rules/`.
-- **File-by-file descriptions**: long sections describing each file in a folder. Suggest converting to a short routing table or removing.
-- **Standard convention restatements**: rules that just repeat what the language enforces (`Use camelCase for JS`, `Use snake_case for Python`).
+- **Vague rules**: rules with no concrete value, command, file path, or measurable threshold. Heuristic: a rule containing `properly`, `correctly`, `clean`, `good`, `appropriate` gets flagged for review.
+- **Code-style rules**: catch `\b(use|prefer)\s+\d+\s+(space|tab)`, single-quote rules, and formatting opinions. Recommend moving them to linter config plus `.claude/rules/`.
+- **File-by-file descriptions**: long stretches describing each file in a folder. Recommend a short routing table instead, or removal.
+- **Standard convention restatements**: rules that only echo what the language enforces (`Use camelCase for JS`, `Use snake_case for Python`).
 - **Self-evident platitudes**: `write clean code`, `follow best practices`, `be careful`, `test your changes`. Cut.
-- **Generic emphasis**: every rule marked `IMPORTANT`. Suggests no real prioritization. Flag.
-- **Top-of-file content**: the first 20 lines should contain the project description, key commands, or critical caveats. If it's preamble or rationale, suggest moving up.
-- **Imports**: detect `@imports`. Walk imports up to 5 hops. Flag if depth >5 (will be dropped).
+- **Generic emphasis**: every rule tagged `IMPORTANT`. That signals no real prioritization. Flag it.
+- **Top-of-file content**: the first 20 lines should hold the project description, key commands, or critical caveats. If it's preamble or rationale, recommend moving it up.
+- **Imports**: detect `@imports`. Walk them up to 5 hops. Flag any depth >5 (it gets dropped).
 - **Heading duplication**: an `# H1` that matches the filename → cut.
-- **Imported content that's never referenced** by the rest of CLAUDE.md → suggest removing.
+- **Imported content that nothing else in CLAUDE.md references** → recommend removing.
 
 ## Sources
 

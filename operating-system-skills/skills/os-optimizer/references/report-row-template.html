@@ -1,8 +1,9 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
 <!--
-Per-framework summary row. The skill renders 7 of these (F1..G7) and
-concatenates them into {{ROWS}} of report-template.html.
+One summary row per framework. The skill renders 7 of these (F1..G7) and
+joins them into {{ROWS}} of report-template.html.
 
-Substitute:
+Fill in:
 
   {{FRAMEWORK_TAG}}        F1 | F2 | F3 | F4 | F5 | F6 | G7
   {{FRAMEWORK_NAME}}       Anthropic CLAUDE.md | Karpathy Wiki | Caveman | …
@@ -14,11 +15,11 @@ Substitute:
   {{FIXABLE}}              3   (count of findings with fixable:true)
   {{FIXED}}                2   (count of findings with fixed:true; always ≤ FIXABLE)
 
-If the framework had no findings: still emit the row with FINDINGS=0,
-FAIL=0, WARN=0, FIXABLE=0, FIXED=0. The detail section will render the clean state.
+When a framework has zero findings: still emit the row with FINDINGS=0,
+FAIL=0, WARN=0, FIXABLE=0, FIXED=0. The detail section renders the clean state.
 
-If FIXABLE > 0 and FIXED < FIXABLE: that gap is "fixable items the user
-skipped or denied this run" — visible at a glance.
+When FIXABLE > 0 and FIXED < FIXABLE, that gap is the set of fixable items the
+user held back or declined this run. It shows at a glance.
 -->
 <tr>
   <td>

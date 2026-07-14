@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # F1 — Anthropic CLAUDE.md (pass implementation)
 
 **Reference (the why):** `references/anthropic-claude-md.md`.
@@ -5,15 +7,15 @@
 
 ## How this pass works
 
-This is **agentic, not regex-driven**. For each check the file lists:
+This pass is **agentic, not regex-driven**. Each check spells out:
 
-- **Framework rule** — what Anthropic claims and why it matters.
-- **Trigger heuristic** — a fast pattern that surfaces candidate matches. The trigger is a starting point, not a verdict. Some checks have no trigger — the file itself is the candidate.
-- **Agent judgment** — what the agent must read and reason about before producing a finding.
-- **False positives to skip** — common cases that look like the trigger but aren't actually violations.
-- **Finding format** — every finding includes `reasoning` (1–2 sentences specific to this case).
+- **Framework rule** — the claim Anthropic makes and the reason it counts.
+- **Trigger heuristic** — a quick pattern that pulls up candidate matches. Treat the trigger as a lead, not a ruling. Some checks have no trigger, in which case the file itself is the candidate.
+- **Agent judgment** — what the agent has to read and think through before it writes a finding.
+- **False positives to skip** — cases that resemble the trigger but are not real violations.
+- **Finding format** — every finding carries `reasoning` (1–2 sentences tied to this exact case).
 
-The agent reads the file in full, applies every check, and **only produces findings the reasoning step confirms**. If the trigger fires 47 times but only 5 cases actually violate the rule in context, the run produces 5 findings, not 47.
+The agent reads the whole file, runs every check, and **writes findings only where the reasoning step confirms them**. If the trigger fires 47 times but only 5 of those actually break the rule in context, the run reports 5 findings, not 47.
 
 ## Contents
 
@@ -35,15 +37,15 @@ The agent reads the file in full, applies every check, and **only produces findi
 
 ## F1.1 — Size check
 
-**Framework rule:** keep CLAUDE.md under 200 lines (community ceiling 300). Beyond ~200, the marginal line subtracts signal.
+**Framework rule:** hold CLAUDE.md under 200 lines (community ceiling 300). Past roughly 200, each extra line costs you signal instead of adding it.
 
 **Trigger heuristic:** `wc -l` and `stat`. >200 lines = candidate. >300 lines = strong candidate.
 
 **Agent judgment:**
-- Read the file. Decide whether the size is the problem, or whether the file is mostly a routing table / structured tables (which compress well in attention).
-- A 247-line CLAUDE.md that's 80% bullet rules and prose → real specificity drag, flag.
-- A 247-line CLAUDE.md that's 70% routing tables → less of an attention problem; flag with lower severity and recommend extracting just the prose sections.
-- For **folder-claude**, the budget is tighter (folder CLAUDE.mds layer on top of root). Flag at >120 lines.
+- Read the file. Work out whether the length itself is the problem, or whether the file is mostly a routing table or structured tables, which stay dense in attention.
+- A 247-line CLAUDE.md that runs 80% bullet rules and prose is real specificity drag, so flag it.
+- A 247-line CLAUDE.md that runs 70% routing tables is less of an attention cost. Flag it at lower severity and point at pulling out only the prose sections.
+- For **folder-claude**, the budget is tighter because folder CLAUDE.mds stack on top of the root. Flag at >120 lines.
 
 **Severity:**
 - root: warn 200–300, fail >300
@@ -63,7 +65,7 @@ Citation: anthropic-claude-md.md → Hard rules (200-line target)
 
 ## F1.2 — Specificity heuristic
 
-**Framework rule:** specific rules earn ~89% compliance; vague rules ~35%. The biggest lever in CLAUDE.md quality.
+**Framework rule:** specific rules land around 89% compliance; vague rules land around 35%. This is the single biggest lever on CLAUDE.md quality.
 
 **Trigger heuristic:** scan for vague terms (case-insensitive):
 ```
@@ -71,18 +73,18 @@ Citation: anthropic-claude-md.md → Hard rules (200-line target)
 ```
 Plus known-vague phrases: "be careful", "follow best practices", "write clean code", "test your changes", "format code properly", "keep things organized", "use good judgment".
 
-**Agent judgment:** for each candidate line, decide whether it's actually a vague rule:
+**Agent judgment:** for each candidate line, decide whether it is genuinely a vague rule:
 - Is the line a numbered rule, bullet, or imperative? (Not a heading, quote, or reference.)
-- Does the rule include a concrete anchor — file path, function name, command, threshold, named system? If yes → not vague.
-- Is the vagueness deliberate? E.g., creative tasks ("Write in a thoughtful tone") may be irreducibly judgment-based — flag with lower severity.
-- Is the rule a closing reminder ("Be careful with auth") inside an otherwise specific file? Lower severity — it's a gentle echo, not the primary instruction.
-- A rule like "Be careful with payments — see `payments/README.md`" is **specific** because it cites the anchor. Don't flag.
+- Does the rule carry a concrete anchor: a file path, function name, command, threshold, or named system? If yes, it is not vague.
+- Is the vagueness on purpose? For creative tasks ("Write in a thoughtful tone") the judgment can't be reduced further, so flag it at lower severity.
+- Is the rule a closing reminder ("Be careful with auth") sitting inside an otherwise specific file? Lower severity, because it is a gentle echo rather than the primary instruction.
+- A rule like "Be careful with payments — see `payments/README.md`" is **specific** because it names the anchor. Leave it.
 
 **False positives to skip:**
 - Headings, quotes, references to external docs.
-- Rules that already cite a specific file/function/threshold.
-- Brand voice files where vagueness reflects subjective intent.
-- The word "carefully" inside a code block or quoted user message.
+- Rules that already name a specific file, function, or threshold.
+- Brand voice files where the vagueness reflects subjective intent.
+- The word "carefully" sitting inside a code block or a quoted user message.
 
 **Severity:** warn (one per genuinely vague rule). Cap at 25 per file.
 
@@ -101,7 +103,7 @@ Citation: anthropic-claude-md.md → Specificity beats vagueness
 
 ## F1.3 — Code-style rules
 
-**Framework rule:** code-style rules belong in linter config + `.claude/rules/`, not CLAUDE.md (linters are deterministic; CLAUDE.md isn't).
+**Framework rule:** code-style rules belong in linter config plus `.claude/rules/`, not in CLAUDE.md. Linters run deterministically; CLAUDE.md does not.
 
 **Trigger heuristic:**
 ```
@@ -113,13 +115,13 @@ Citation: anthropic-claude-md.md → Specificity beats vagueness
 ```
 
 **Agent judgment:** read the candidate line in context.
-- Is it actually a code-style rule (formatting, naming) or a substantive constraint (e.g., "API responses must be JSON" — that's a contract, not style)?
-- Does the project already have a linter config (`.eslintrc`, `.prettierrc`, `pyproject.toml` with `[tool.ruff]`, etc.)? If yes → flag, recommend deletion. If no → flag, recommend creating linter config + moving the rule.
-- Is the rule path-scoped (e.g., "TS files use 2 spaces, JSON uses 4")? That's a `.claude/rules/{language}.md` candidate — flag with that recommendation.
+- Is it truly a code-style rule (formatting, naming), or a substantive constraint (for example "API responses must be JSON", which is a contract, not style)?
+- Does the project already carry a linter config (`.eslintrc`, `.prettierrc`, `pyproject.toml` with `[tool.ruff]`, and so on)? If yes, flag it and recommend deletion. If no, flag it and recommend creating linter config plus moving the rule.
+- Is the rule path-scoped (for example "TS files use 2 spaces, JSON uses 4")? That is a `.claude/rules/{language}.md` candidate. Flag it with that recommendation.
 
 **False positives to skip:**
-- Naming-convention mentions in *prose* about a codebase pattern ("the API uses snake_case keys" — that's documenting external behavior, not enforcing style).
-- Linter directive strings in code blocks (`/* eslint-disable */` etc.).
+- Naming-convention mentions in *prose* describing a codebase pattern ("the API uses snake_case keys" documents external behavior, it does not enforce style).
+- Linter directive strings inside code blocks (`/* eslint-disable */` and similar).
 
 **Severity:** warn.
 
@@ -138,20 +140,20 @@ Citation: anthropic-claude-md.md → Don'ts ("don't include code style rules")
 
 ## F1.4 — File-by-file descriptions
 
-**Framework rule:** don't include file-by-file descriptions of the codebase — Claude reads code.
+**Framework rule:** skip file-by-file descriptions of the codebase. Claude reads code.
 
-**Trigger heuristic:** detect runs of ≥6 contiguous list items or table rows where ≥4 items contain a path/folder reference followed by descriptive prose.
+**Trigger heuristic:** detect runs of ≥6 contiguous list items or table rows where ≥4 items contain a path or folder reference followed by descriptive prose.
 
 **Agent judgment:**
 - Read the section. Is it a routing table (short cells, ≤1 line each) or a long descriptive list?
-- A routing table is fine — it's a navigation index, not file documentation. Skip.
-- A list where each item is ">40 chars of description per file" is the anti-pattern. Flag.
-- Is the file describing **external** API surfaces (e.g., a reference SKILL listing endpoints)? That's documentation, not file-by-file project description. Skip.
+- A routing table is fine. It is a navigation index, not file documentation. Skip it.
+- A list where each item runs ">40 chars of description per file" is the anti-pattern. Flag it.
+- Is the file describing **external** API surfaces (for example a reference SKILL listing endpoints)? That is documentation, not a file-by-file project description. Skip it.
 
 **False positives to skip:**
 - Routing tables (short cells).
 - API reference lists in skills.
-- Lists where each item describes a *concept* (not a file).
+- Lists where each item describes a *concept* rather than a file.
 
 **Severity:** warn.
 
@@ -169,7 +171,7 @@ Action: collapse to a {N}-line routing table, or delete entirely
 
 ## F1.5 — Self-evident platitudes
 
-**Framework rule:** don't include self-evident practices ("write clean code", "follow best practices", "be careful").
+**Framework rule:** leave out self-evident practices ("write clean code", "follow best practices", "be careful").
 
 **Trigger heuristic:** whole-line patterns:
 ```
@@ -177,12 +179,12 @@ Action: collapse to a {N}-line routing table, or delete entirely
 ```
 
 **Agent judgment:**
-- For each candidate, is it the entire rule, or is it qualified by an anchor? "Be thorough — run all 4 tests in `tests/integration/`" → not a platitude, skip.
-- Is the platitude inside a callout or summary that's deliberately high-level? Lower severity.
-- Many platitudes overlap with F1.2; deduplicate — if both fire, prefer F1.5 because it's a stronger signal (delete vs rewrite).
+- For each candidate, is it the whole rule, or is an anchor attached? "Be thorough — run all 4 tests in `tests/integration/`" is not a platitude, so skip it.
+- Is the platitude sitting inside a callout or summary that is deliberately high-level? Lower severity.
+- Many platitudes overlap with F1.2. Deduplicate: if both fire, prefer F1.5, because it is the stronger signal (delete beats rewrite).
 
 **False positives to skip:**
-- Platitudes that include a specific anchor on the same line.
+- Platitudes carrying a specific anchor on the same line.
 - Quotes from external sources (Karpathy quotes, Anthropic quotes).
 - Platitudes inside a `<details>` block kept for historical reasons.
 
@@ -208,16 +210,16 @@ Action: delete (preferred) or replace with a concrete imperative tied to a proje
 ```
 \b(IMPORTANT|YOU MUST|CRITICAL|NEVER|ALWAYS|MUST|REQUIRED)\b
 ```
-Then count total numbered/bulleted rules. Compute ratio.
+Then count total numbered or bulleted rules. Compute the ratio.
 
 **Agent judgment:** read the file.
-- A high ratio in a short, all-critical file (security policy, deployment guard) is *earned* — every rule really is must-not-fail. Lower severity or skip.
-- A high ratio in a 250-line CLAUDE.md is the anti-pattern — flag.
-- For each `IMPORTANT` rule, ask: would Claude failing this cause a real production incident? If yes for most, the emphasis is earned. If no, the emphasis is inflation.
+- A high ratio in a short, all-critical file (security policy, deployment guard) is *earned*: every rule really is must-not-fail. Lower severity, or skip.
+- A high ratio in a 250-line CLAUDE.md is the anti-pattern. Flag it.
+- For each `IMPORTANT` rule, ask: would Claude failing this cause a real production incident? If that holds for most of them, the emphasis is earned. If not, the emphasis is inflation.
 
 **False positives to skip:**
 - Files where every rule is genuinely critical (security, payments, irreversible ops).
-- Emphasis inside callouts (`> [!important]`) — the callout already does the marking.
+- Emphasis inside callouts (`> [!important]`), where the callout already does the marking.
 
 **Severity:**
 - ratio > 0.5 → fail
@@ -236,19 +238,19 @@ Action: reserve emphasis for rules where failure is genuinely costly; demote the
 
 ## F1.7 — Position effect (top-of-file lead)
 
-**Framework rule:** LLMs over-attend to the start and end. Lead with the load-bearing rule.
+**Framework rule:** LLMs over-attend to the start and the end. Lead with the load-bearing rule.
 
-**Trigger heuristic:** read the first 30 lines (or first 30%, whichever is more). Score for "load-bearing" presence.
+**Trigger heuristic:** read the first 30 lines (or the first 30%, whichever is more). Score it for "load-bearing" presence.
 
 **Agent judgment:** the agent reads the top of the file and asks:
-- If Claude only had the first 30 lines, would it know the most important things this file is trying to enforce?
-- Is the top a routing table, a numbered list of rules, or a callout? → leading well.
-- Is the top a long descriptive prose block, an introduction ("This document explains…"), or a personality preamble? → buried lead.
-- Sometimes preamble is necessary (e.g., a skill SKILL.md needs the description and frontmatter). Judge what's load-bearing **for this file's role**.
+- If Claude had only the first 30 lines, would it know the most important things this file is trying to enforce?
+- Is the top a routing table, a numbered list of rules, or a callout? Then it leads well.
+- Is the top a long descriptive prose block, an introduction ("This document explains…"), or a personality preamble? Then the lead is buried.
+- Sometimes preamble is required (for example a skill SKILL.md needs its description and frontmatter). Judge what is load-bearing **for this file's role**.
 
 **False positives to skip:**
 - Files where preamble is mandated (frontmatter blocks, license headers).
-- Files where the H1 + a single one-line summary at top IS the load-bearing claim.
+- Files where the H1 plus a single one-line summary at the top IS the load-bearing claim.
 
 **Severity:** warn.
 
@@ -266,18 +268,18 @@ Action: lead with {specific section name observed deeper in the file} that's act
 
 ## F1.8 — `@import` depth walk
 
-**Framework rule:** imports max 5 hops; beyond that they're dropped. Imports do NOT save tokens.
+**Framework rule:** imports cap at 5 hops. Past that they get dropped. Imports do NOT save tokens.
 
-**Trigger heuristic:** grep `^@(\S+)`. Resolve each, recurse, track depth.
+**Trigger heuristic:** grep `^@(\S+)`. Resolve each one, recurse, track depth.
 
-**Agent judgment:** mostly mechanical — depth count is the rule. But the agent reads the file to:
-- Confirm the import line isn't inside a code fence (code samples about imports).
-- Decide whether to flag a depth-5 file as warn or fail given that one more hop is a hard drop.
+**Agent judgment:** mostly mechanical, since the depth count is the rule. The agent still reads the file to:
+- Confirm the import line is not inside a code fence (code samples about imports).
+- Decide whether a depth-5 file is warn or fail, given that one more hop is a hard drop.
 - Detect cycles by tracking visited paths.
 
 **False positives to skip:**
 - `@`-prefixed strings inside code fences or inline code.
-- Git tags / npm scoped names that happen to start with `@` but aren't markdown imports.
+- Git tags or npm scoped names that start with `@` but are not markdown imports.
 
 **Severity:**
 - depth > 5 → fail (will be dropped)
@@ -301,16 +303,16 @@ Action: flatten the chain or remove the deepest import; imports don't save token
 **Framework rule:** path-scoped rules belong in `.claude/rules/*.md` with `paths:` frontmatter.
 
 **Trigger heuristic:**
-1. Did F1.3 fire ≥3 times in the CLAUDE.md tree?
-2. Does `.claude/rules/` exist? If it does, do its files have `paths:` frontmatter?
+1. Did F1.3 fire ≥3 times across the CLAUDE.md tree?
+2. Does `.claude/rules/` exist? If it does, do its files carry `paths:` frontmatter?
 
 **Agent judgment:**
-- If F1.3 fired and `.claude/rules/` is missing → strong recommendation. Reasoning lists the specific style rules that would move there.
-- If `.claude/rules/` exists with files lacking `paths:` → those files load unconditionally and act like CLAUDE.md. Flag each one with reasoning explaining the loss of progressive disclosure.
-- If `.claude/rules/` exists with proper `paths:` frontmatter → no finding.
+- If F1.3 fired and `.claude/rules/` is missing, make a strong recommendation. The reasoning lists the specific style rules that would move there.
+- If `.claude/rules/` exists but its files lack `paths:`, those files load unconditionally and behave like CLAUDE.md. Flag each one, with reasoning that spells out the lost progressive disclosure.
+- If `.claude/rules/` exists with proper `paths:` frontmatter, write no finding.
 
 **False positives to skip:**
-- Vaults with no code-style rules in CLAUDE.md → no recommendation needed.
+- Vaults with no code-style rules in CLAUDE.md need no recommendation.
 
 **Severity:** warn.
 
@@ -334,17 +336,17 @@ Action: add a paths: array so the rule only loads when matching files are read
 
 ## F1.10 — Heading duplicates filename
 
-**Framework rule:** don't put a `# Title` heading that duplicates the filename.
+**Framework rule:** don't add a `# Title` heading that repeats the filename.
 
-**Trigger heuristic:** read the first non-frontmatter content line. If it's `# {Title}`, slugify both `{Title}` and the filename; if they match → candidate.
+**Trigger heuristic:** read the first non-frontmatter content line. If it is `# {Title}`, slugify both `{Title}` and the filename. If they match, it is a candidate.
 
 **Agent judgment:** mostly mechanical, but the agent reads to confirm:
-- Is the H1 actually a title duplicating the filename, or a section heading (e.g., `# Overview`) that just happens to overlap?
-- For `CLAUDE.md` files, the H1 is usually `# CLAUDE.md` literally — that's the duplicate to remove.
-- For `README.md`, an H1 of `# Project Name` may be intentional GitHub display — flag with lower severity.
+- Is the H1 really a title repeating the filename, or a section heading (for example `# Overview`) that happens to overlap?
+- For `CLAUDE.md` files, the H1 is usually the literal `# CLAUDE.md`. That is the duplicate to remove.
+- For `README.md`, an H1 of `# Project Name` may be intentional GitHub display. Flag it at lower severity.
 
 **False positives to skip:**
-- READMEs at repo root where the H1 displays in GitHub UI (judgment call — flag, but recommend keeping if user prefers the GitHub render).
+- READMEs at repo root where the H1 displays in the GitHub UI (a judgment call: flag it, but recommend keeping it if the user prefers the GitHub render).
 
 **Severity:** warn.
 
@@ -361,18 +363,18 @@ Action: remove the H1 line and any blank line below
 
 ## F1.11 — Conflicting rules
 
-**Framework rule:** two contradicting rules → Claude picks one arbitrarily. Resolve conflicts.
+**Framework rule:** two rules that contradict each other leave Claude to pick one at random. Resolve the conflict.
 
 **Trigger heuristic:** for each line containing `Always|Never|Must|Don't|Do not`, scan the rest of the file for another line with the opposite modal that shares ≥3 content tokens (after stopword removal).
 
 **Agent judgment:** read both candidate lines.
-- Are they actually contradicting, or scoped differently? "Always commit before pushing" + "Never commit on main" — different scopes, no conflict. Skip.
-- Are they sequenced ("first do X; never do X without Y")? → not a conflict.
-- Are they truly clashing? → flag, with reasoning showing the contradiction.
+- Do they really contradict, or are they scoped differently? "Always commit before pushing" plus "Never commit on main" have different scopes and no conflict. Skip.
+- Are they sequenced ("first do X; never do X without Y")? Then it is not a conflict.
+- Do they truly clash? Then flag it, with reasoning that shows the contradiction.
 
 **False positives to skip:**
-- Differently-scoped rules.
-- Rules where one is a default and the other is an exception ("Always run tests; never run tests on the deploy branch").
+- Rules with different scopes.
+- Rules where one is a default and the other an exception ("Always run tests; never run tests on the deploy branch").
 
 **Severity:** warn.
 
@@ -403,9 +405,9 @@ Action: resolve which rule wins; remove or qualify the other
 ```
 
 **Agent judgment:** read the line.
-- Is it restating a default convention the language already enforces? → flag.
-- Is it overriding a convention (e.g., "We use snake_case in JS for legacy reasons")? → not a restatement; valid project rule. Skip.
-- Is it documentation about an external API's conventions? → skip.
+- Is it restating a default convention the language already enforces? Then flag it.
+- Is it overriding a convention (for example "We use snake_case in JS for legacy reasons")? That is not a restatement, it is a valid project rule. Skip it.
+- Is it documentation about an external API's conventions? Skip it.
 
 **False positives to skip:**
 - Project-specific overrides.
@@ -443,4 +445,4 @@ Action: delete
 }
 ```
 
-The `reasoning` field is mandatory — every finding has it. A finding without reasoning is a bug, not a finding.
+The `reasoning` field is mandatory. Every finding carries it. A finding without reasoning is a bug, not a finding.

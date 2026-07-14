@@ -51,7 +51,7 @@ Where do you want to be in 3 years?
 
 ## Monthly Focus
 
-Top 3-5 priorities for the current month.
+Top 3-5 priorities for this month.
 
 | Focus | Why | Project | Key Result | Status |
 |-------|-----|---------|------------|--------|
@@ -65,6 +65,6 @@ Top 3-5 priorities for the current month.
 ---
 
 > [!tip] Review Cadence
-> - **Monthly**: Update monthly focus, check yearly progress
-> - **Quarterly**: Review yearly goals, update vision if needed
-> - **Weekly**: During weekly review, flag goals with no active project
+> - **Monthly**: Update the monthly focus, check yearly progress
+> - **Quarterly**: Review yearly goals, update the vision if needed
+> - **Weekly**: During the weekly review, flag goals with no active project

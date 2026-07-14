@@ -28,7 +28,7 @@ updated: [YYYY-MM-DD]
 
 ### Feeling To Carry Away
 
-[The feeling readers / customers should be left with after consuming your content.]
+[The feeling readers / customers should be left with after they consume your content.]
 
 ## Tone Guidelines
 
@@ -57,7 +57,7 @@ updated: [YYYY-MM-DD]
 ## Positioning
 
 - **Enemy**: [the category, behavior, status quo, or competitor archetype you're fighting]
-- **How We Solve Differently**: [how you solve the problem differently from obvious alternatives]
+- **How We Solve Differently**: [how you solve the problem differently from the obvious alternatives]
 - **Brand Personality (5 adjectives)**: [adj 1, adj 2, adj 3, adj 4, adj 5]
 - **Big Concept**: [the central concept the brand or company is built on]
 
@@ -70,10 +70,10 @@ updated: [YYYY-MM-DD]
 
 ## Visual Identity
 
-- **Colors**: [hex codes — primary, secondary, accent]
+- **Colors**: [hex codes: primary, secondary, accent]
 - **Typography**: [primary font, secondary font]
 - **Design Rules**: [spacing, contrast, image style]
-- **Logo / Marks**: [where assets live]
+- **Logo / Marks**: [where the assets live]
 
 ## Style Notes
 

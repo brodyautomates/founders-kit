@@ -14,7 +14,7 @@ updated: [YYYY-MM-DD]
 
 ## Operating Principle
 
-> [one-line principle that guides decisions]
+> [one-line principle that guides your decisions]
 
 ## Working Model
 
@@ -26,11 +26,11 @@ updated: [YYYY-MM-DD]
 
 ## Responsibilities
 
-- [key areas you own]
+- [the key areas you own]
 
 ## Current State
 
-[The active challenge right now. What's working, what isn't, where attention is going.]
+[The active challenge right now. What's working, what isn't, where your attention is going.]
 
 ## Unclosed Loops (Active RAM Drains)
 
@@ -44,7 +44,7 @@ updated: [YYYY-MM-DD]
 
 ## Tools & Access
 
-- [systems and tools you use daily]
+- [the systems and tools you use daily]
 
 ## Preferences
 

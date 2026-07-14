@@ -12,8 +12,8 @@ updated: [YYYY-MM-DD]
 | [name] | [role] | [what they own] | [preferences] |
 
 ## Working Agreements
-- [how the team communicates — Slack, email, etc.]
-- [meeting cadence — standups, retros, etc.]
+- [how the team communicates: Slack, email, etc.]
+- [meeting cadence: standups, retros, etc.]
 - [decision-making process]
 
 ## Key Contacts (External)

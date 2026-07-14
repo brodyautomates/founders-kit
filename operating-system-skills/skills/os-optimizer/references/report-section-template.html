@@ -1,14 +1,15 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
 <!--
-Per-framework detail section. The skill renders 7 of these (F1..G7) and
-concatenates into {{DETAILS}} of report-template.html.
+One detail section per framework. The skill renders 7 of these (F1..G7) and
+joins them into {{DETAILS}} of report-template.html.
 
-Substitute:
+Fill in:
 
   {{FRAMEWORK_TAG}}        F1 | F2 | F3 | F4 | F5 | F6 | G7
   {{FRAMEWORK_NAME}}       Anthropic CLAUDE.md | Karpathy Wiki | …
-  {{FRAMEWORK_WHY}}        one short paragraph describing what the framework
-                           checks and why it matters (taken from the
-                           framework reference's "Core thesis" section).
+  {{FRAMEWORK_WHY}}        one short paragraph on what the framework checks and
+                           why it matters (pulled from the framework reference's
+                           "Core thesis" section).
   {{FILES}}                14
   {{CHECKS}}               12
   {{FINDINGS}}             47
@@ -17,8 +18,8 @@ Substitute:
   {{FIXED}}                12
   {{REFERENCE_FILE}}       references/anthropic-claude-md.md
   {{FINDINGS_HTML}}        rendered finding cards (see report-finding-template.html);
-                           empty string if zero findings (the {{CLEAN_STATE}}
-                           will show instead).
+                           empty string when there are zero findings ({{CLEAN_STATE}}
+                           shows instead).
   {{CLEAN_STATE}}          rendered only when FINDINGS=0; otherwise empty.
                            Suggested content:
                              <div class="clean">✅ All checks passed. No findings for this framework.</div>

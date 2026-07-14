@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # Caveman — compression discipline
 
 ## Contents
@@ -26,20 +28,20 @@
 
 > *"why use many token when few token do trick"*
 
-Eliminate fluff while preserving technical accuracy. Token cost compounds: every articles, every "really," every hedge gets multiplied across thousands of conversations. The right response: strip everything that doesn't earn its tokens.
+Cut the fluff, keep the technical accuracy. Token cost stacks up: each article, each "really," each hedge gets paid over and over across thousands of conversations. The fix is simple. Remove anything that doesn't pay for its own tokens.
 
-Average compression across the published benchmark: **65%**. Range: **22–87%**. The wins are biggest on prose-heavy explanations; smallest on code reviews and architecture comparisons (where structural reasoning is the load).
+Across the published benchmark the average cut is **65%**. The range runs **22–87%**. The largest wins land on prose-heavy explanations. The smallest land on code reviews and architecture comparisons, where the structural reasoning is doing the work.
 
 ## The Brevity Constraints paper
 
-A March 2026 paper, *"Brevity Constraints Reverse Performance Hierarchies in Language Models,"* found brevity constraints improved accuracy by **+26 percentage points** on certain benchmarks. The mechanism: forcing brevity forces the model to identify and surface the load-bearing claim instead of burying it in qualifications.
+A March 2026 paper, *"Brevity Constraints Reverse Performance Hierarchies in Language Models,"* reported that brevity constraints raised accuracy by **+26 percentage points** on certain benchmarks. Here is the mechanism: when the model is forced to be brief, it has to find the load-bearing claim and put it on the surface rather than hiding it under a pile of qualifications.
 
-This is the academic backing for caveman's intuition: brevity isn't only a token saver — it's a quality lever.
+That gives caveman academic footing. Brevity saves tokens, and it also raises quality.
 
 ## Compression rules — what to strip
 
 ### Articles
-Drop "a," "an," "the" wherever meaning holds.
+Cut "a," "an," "the" anywhere the meaning survives.
 
 ✅ Strip: *"the README"* → *"README"*
 ✅ Strip: *"a function that returns"* → *"function returns"*
@@ -55,7 +57,7 @@ Drop "a," "an," "the" wherever meaning holds.
 - "definitely"
 - "literally"
 
-These add no information. Strip without exception.
+These carry zero information. Strip them every time.
 
 ### Pleasantries
 - "Sure!"
@@ -78,7 +80,7 @@ These add no information. Strip without exception.
 - "sort of"
 - "in a way"
 
-Use imperatives instead. *"I think you should run npm test"* → *"Run `npm test`"*.
+Give the imperative instead. *"I think you should run npm test"* → *"Run `npm test`"*.
 
 ### Throat-clearing preambles
 - "Before we dive in..."
@@ -86,7 +88,7 @@ Use imperatives instead. *"I think you should run npm test"* → *"Run `npm test
 - "It's worth noting..."
 - "Let's start by..."
 
-Just say the thing.
+Say the thing.
 
 ### Verbose connectors
 - "in order to" → "to"
@@ -97,15 +99,15 @@ Just say the thing.
 
 ## Allowed structures
 
-- **Fragments are good.** "Node by node." "In real time." Single-thought lines hit hardest.
+- **Fragments are good.** "Node by node." "In real time." A single-thought line lands hardest.
 - **Pattern:** `[thing] [action] [reason]. [next step].`
   - Example: *"Add `withAuth()`. Wraps handler in JWT check. Then redeploy."*
 - **Imperatives over conditionals.** "Run X" beats "You might want to run X."
-- **Routing tables over prose.** When you have ≥3 categorical mappings, switch to a markdown table.
+- **Routing tables over prose.** Once you have ≥3 categorical mappings, move to a markdown table.
 
 ## Hard-protected zones — never compress
 
-These break if compressed:
+Compressing these breaks them:
 
 | Zone | Why |
 |---|---|
@@ -121,11 +123,11 @@ These break if compressed:
 | **Markdown table delimiters** | Structural |
 | **Identifier names** | API contracts |
 
-When in doubt: if a tool reads it, don't compress it. If a human reads it, compress.
+Simple test: if a tool reads it, leave it alone. If a human reads it, compress it.
 
 ## Symbol substitution table
 
-When unambiguous in context, replace verbose connectors with symbols. **Use sparingly** — over-symbolic prose becomes unreadable to humans.
+Where the context makes it unambiguous, swap verbose connectors for symbols. **Use sparingly.** Prose stuffed with symbols stops being readable to humans.
 
 | Verbose | Symbol | When safe |
 |---|---|---|
@@ -147,7 +149,7 @@ When unambiguous in context, replace verbose connectors with symbols. **Use spar
 | **Ultra** | `/caveman ultra` | Telegraphic; aggressive abbreviation | Token-budget-critical contexts; expert audience only |
 | **文言文 (wenyan)** | `/caveman wenyan` | Classical Chinese literary compression | Same philosophy, different language |
 
-For a typical vault audit, **Full** is the default level. Lite is reserved for human-facing surface docs.
+On a normal vault audit, run **Full** as the default. Save Lite for the human-facing surface docs.
 
 ## Real benchmark — verbatim
 
@@ -163,7 +165,7 @@ For a typical vault audit, **Full** is the default level. Lite is reserved for h
 | Architecture: microservices vs monolith | 446 | 310 | **30%** |
 | Refactor callback to async/await | 387 | 301 | **22%** |
 
-Pattern: explanation-heavy tasks compress 70–87%. Reasoning-heavy tasks (architecture comparisons, code reviews) compress 22–41% because the structural argument is the load.
+The pattern is clear. Explanation-heavy tasks compress 70–87%. Reasoning-heavy tasks like architecture comparisons and code reviews compress 22–41%, because the structural argument is the payload.
 
 ## Before / after examples
 
@@ -175,7 +177,7 @@ Pattern: explanation-heavy tasks compress 70–87%. Reasoning-heavy tasks (archi
 > **Caveman (19 tokens):**
 > *"New object ref each render. Inline object prop = new ref = re-render. Wrap in `useMemo`."*
 
-**73% reduction.** Same operational value. The fix is more findable in the second version.
+**73% reduction.** Identical operational value. The fix is easier to find in the second version.
 
 ### Example 2: CLAUDE.md instruction (vault-relevant)
 
@@ -185,7 +187,7 @@ Pattern: explanation-heavy tasks compress 70–87%. Reasoning-heavy tasks (archi
 > **Caveman (14 tokens):**
 > *"Run `npm test` before commit. Required for `src/api/**` changes."*
 
-**63% reduction.** The vague "generally a good idea" became a specific imperative — which Anthropic's research says jumps compliance from 35% → 89%.
+**63% reduction.** The soft "generally a good idea" turned into a hard imperative, and Anthropic's research says that alone moves compliance from 35% → 89%.
 
 ### Example 3: routing rule
 
@@ -195,11 +197,11 @@ Pattern: explanation-heavy tasks compress 70–87%. Reasoning-heavy tasks (archi
 > **Caveman (16 tokens):**
 > *"Meeting → `Intelligence/meetings/{type}/`"*
 
-**50% reduction.** A routing table replaces a paragraph.
+**50% reduction.** One routing table stands in for a full paragraph.
 
 ## Companion skills
 
-The caveman repo ships several skills that apply the discipline at different layers:
+The caveman repo ships a few skills that carry the discipline into different layers:
 
 | Skill | What it compresses |
 |---|---|
@@ -207,7 +209,7 @@ The caveman repo ships several skills that apply the discipline at different lay
 | **caveman-review** | PR review comments — one-line per issue (e.g., `L42: 🔴 bug: user null. Add guard.`) |
 | **caveman-compress** | Memory files (CLAUDE.md, MEMORY.md) — ~46% input savings, originals preserved |
 
-For vault audits, the equivalent would be a focused pass that runs caveman on the CLAUDE.md hierarchy. This is on the roadmap; not in v0.
+For vault audits the parallel would be a focused pass that runs caveman across the CLAUDE.md hierarchy. That one is on the roadmap. It is not in v0.
 
 ## Where to apply caveman in a vault
 
@@ -233,25 +235,25 @@ The rule of thumb: **compress the agent-facing instruction layer, leave the huma
 
 ## Dos
 
-- Strip articles, filler, hedging, pleasantries from prose in instruction files.
-- Use fragments where grammar isn't load-bearing.
-- Use imperatives instead of conditionals.
+- Strip articles, filler, hedging, and pleasantries from prose in instruction files.
+- Use fragments wherever the grammar carries no weight.
+- Use imperatives in place of conditionals.
 - Use the `[thing] [action] [reason]. [next step].` pattern for procedures.
-- Convert prose with ≥3 categorical mappings into routing tables.
-- Use `→` for cause/effect; `&` for compound subjects only when unambiguous.
-- Apply Caveman Full to CLAUDE.md and `.claude/rules/`.
-- Apply Caveman Lite to surface-level docs that still need to read smoothly.
-- Re-run compression as a periodic chore — drift creeps back in.
+- Turn prose with ≥3 categorical mappings into a routing table.
+- Use `→` for cause/effect; use `&` for compound subjects only when it stays unambiguous.
+- Run Caveman Full on CLAUDE.md and `.claude/rules/`.
+- Run Caveman Lite on surface-level docs that still need to read smoothly.
+- Re-run compression on a schedule. Drift creeps back.
 
 ## Don'ts
 
 - **Never** compress code blocks, URLs, file paths, commands, version numbers, headings, dates, frontmatter, wikilinks, or inline code.
 - Don't strip technical terms or identifiers.
 - Don't compress reasoning/thinking tokens (these are output, not instruction).
-- Don't compress files teammates read manually for human comprehension.
-- Don't go to Ultra level on team-shared instruction files — readability matters for review.
-- Don't over-symbolize — `→` and `&` are fine; chaining 5+ symbols per sentence becomes unreadable.
-- Don't compress brand voice docs, writing samples, transcripts.
+- Don't compress files teammates read by hand for human comprehension.
+- Don't push team-shared instruction files to Ultra level. Reviewers need to read them.
+- Don't over-symbolize. `→` and `&` are fine. Five symbols per sentence stops being readable.
+- Don't compress brand voice docs, writing samples, or transcripts.
 - Don't compress raw sources / immutable canon.
 
 ## Verbatim quotes

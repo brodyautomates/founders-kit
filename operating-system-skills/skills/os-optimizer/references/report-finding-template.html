@@ -1,19 +1,20 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
 <!--
-One finding card. The skill renders one of these per finding (capped at
-top-25 per framework) and concatenates into the section's {{FINDINGS_HTML}}.
+One finding card. The skill renders one per finding (capped at the top 25 per
+framework) and joins them into the section's {{FINDINGS_HTML}}.
 
-Substitute:
+Fill in:
 
-  {{SEVERITY_CLASS}}    fail | warn | info  (drives left border color)
+  {{SEVERITY_CLASS}}    fail | warn | info  (drives the left border color)
   {{SEVERITY_LABEL}}    FAIL | WARN | INFO  (uppercase pill text)
   {{CHECK_ID}}          F1.2 | F2.4 | F3.1 | …
   {{CHECK_NAME}}        "Specificity heuristic" | "Dead wikilinks" | …
   {{PATH}}              ./Projects/foo/CLAUDE.md
-  {{LINE}}              :42  (or empty string if line not applicable)
-  {{EXCERPT}}           the matched line or surrounding context (HTML-escape it!)
-  {{REASONING}}         1-2 sentences explaining why THIS specific case
-                        violates the framework rule given THIS file's content.
-                        Mandatory — every finding has reasoning.
+  {{LINE}}              :42  (or empty string when line is not applicable)
+  {{EXCERPT}}           the matched line or its surrounding context (HTML-escape it!)
+  {{REASONING}}         1-2 sentences on why THIS specific case breaks the
+                        framework rule given THIS file's content.
+                        Mandatory: every finding has reasoning.
                         (HTML-escape it!)
   {{ACTION}}            the remediation text (HTML-escape it!)
   {{STATUS_PILL}}       Three-state pill, computed from finding.fixable & finding.fixed:
@@ -22,8 +23,8 @@ Substitute:
                           fixable:true && fixed:true    → <span class="pill fixed">FIXED THIS RUN</span>
   {{CITATION}}          "anthropic-claude-md.md → Specificity beats vagueness"
 
-NOTE on HTML escaping: when substituting EXCERPT, REASONING, and ACTION,
-escape `<`, `>`, `&`, `"` so user content doesn't break the HTML.
+HTML escaping: when filling in EXCERPT, REASONING, and ACTION, escape
+`<`, `>`, `&`, `"` so user content cannot break the HTML.
 -->
 <div class="finding {{SEVERITY_CLASS}}">
   <div class="top">

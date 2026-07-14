@@ -29,7 +29,7 @@ One section per business unit / revenue line. Add or remove sections as needed.
 
 ## 2. [Next Business / Product]
 
-[Repeat structure as needed.]
+[Repeat the structure as needed.]
 
 ## Sunsetting / Archived
 

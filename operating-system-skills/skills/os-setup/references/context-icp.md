@@ -31,7 +31,7 @@ updated: [YYYY-MM-DD]
 
 ## Decision Time
 
-[How long they typically take to decide. Days, weeks, quarters? What stretches it.]
+[How long they typically take to decide. Days, weeks, quarters? What stretches it out.]
 
 ## Market Trends Affecting Them
 

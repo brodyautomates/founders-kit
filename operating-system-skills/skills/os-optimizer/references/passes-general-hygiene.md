@@ -1,11 +1,13 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # G7 — General Hygiene (pass implementation)
 
-**Reference (the why):** project rules + practitioner field notes. Not from a single canonical framework.
+**Reference (the why):** project rules plus practitioner field notes. This one does not come from a single canonical framework.
 **Applies to:** every `.md` file in the vault.
 
 ## How this pass works
 
-Agentic. Em dash detection and H1=filename are mostly mechanical, but the agent reads each candidate to confirm the substitution/deletion is safe given context and to write reasoning that explains why this specific case violates the project rule. See F1's intro for the full pattern.
+Agentic. Em dash detection and H1=filename run mostly mechanically, but the agent reads each candidate to confirm the substitution or deletion is safe in context, then writes reasoning that explains why this exact case breaks the project rule. See F1's intro for the full pattern.
 
 ## Contents
 
@@ -19,23 +21,23 @@ Agentic. Em dash detection and H1=filename are mostly mechanical, but the agent 
 
 ## G7.1 — Em dashes
 
-**Framework rule (project Rule 14):** never use em dashes; use periods, commas, colons, or restructure.
+**Framework rule (project Rule 14):** never use em dashes. Use periods, commas, colons, or restructure.
 
 **Trigger heuristic:** strip protected zones (code fences, inline code, URLs, frontmatter, wikilinks, paths). Grep for `—` (U+2014) and `–` (U+2013).
 
-**Agent judgment:** for each candidate, read the surrounding sentence and pick the right replacement:
-- Em dash separating two clauses, where the second elaborates on the first → `: ` (colon).
-- Em dash setting off a parenthetical → `, … ,` (commas).
-- Em dash at end of clause functioning as period → `. ` (period).
-- En dash in a numeric range (`100–200`) → keep as en dash; this is canonical, not a Rule-14 violation.
+**Agent judgment:** for each candidate, read the whole sentence around it and pick the right swap:
+- Em dash between two clauses where the second one expands on the first → `: ` (colon).
+- Em dash wrapping a parenthetical → `, … ,` (commas).
+- Em dash closing a clause and acting like a period → `. ` (period).
+- En dash in a numeric range (`100–200`) → keep the en dash. This is canonical, not a Rule-14 violation.
 - En dash in a date range → keep.
 
-Reasoning picks the right substitution per occurrence and explains why.
+Reasoning names the right swap per occurrence and says why.
 
 **False positives to skip:**
 - Numeric ranges with en dash (`100–200`, `5–10 minutes`).
 - Date ranges (`2026–2027`).
-- Em dashes inside quoted speech (preserve the original text).
+- Em dashes inside quoted speech (leave the original text alone).
 
 **Severity:** warn.
 
@@ -49,9 +51,9 @@ Reasoning: {how the em dashes are used in this file — clause separators, paren
 Action: replace each per the suggestion (substitutions vary by use)
 ```
 
-**Auto-fix:** **fixable on user opt-in** — the agent applies the per-occurrence substitution it confirmed (not a bulk regex).
+**Auto-fix:** **fixable on user opt-in**. The agent applies the per-occurrence substitution it confirmed (not a bulk regex).
 
-After substitution, re-strip protected zones and verify nothing inside code/URLs/wikilinks was modified. If any protected substring is missing/mangled → abort that file's fix and report.
+After the swap, re-strip protected zones and check that nothing inside code, URLs, or wikilinks changed. If any protected substring goes missing or gets mangled → abort that file's fix and report it.
 
 ---
 
@@ -62,13 +64,13 @@ After substitution, re-strip protected zones and verify nothing inside code/URLs
 **Trigger heuristic:** parse frontmatter for files in scope (`note`, `context`, `decision`, `meeting`, `daily`).
 
 **Agent judgment:** for each missing field:
-- Read the file. Can the agent infer the right value?
-  - `status:` → look for completion signals (any "Done", "Shipped", "Decided") → suggest `done`; else `active` for current work.
-  - `tags:` → infer 2+ tags from the file's H1, project context, and content.
-  - `type:` → infer from filename pattern and content (`meeting`, `decision`, `note`, `reference`).
-  - `date:` → look for dates in body.
-  - `project:` / `department:` → infer from folder location.
-- Reasoning supplies the inferred value with confidence — high (clearly visible) or low (best guess).
+- Read the file. Can the agent work out the right value?
+  - `status:` → look for completion signals (any "Done", "Shipped", "Decided") → suggest `done`. Otherwise `active` for current work.
+  - `tags:` → pull 2+ tags from the file's H1, project context, and content.
+  - `type:` → read it off the filename pattern and content (`meeting`, `decision`, `note`, `reference`).
+  - `date:` → look for dates in the body.
+  - `project:` / `department:` → read it off the folder location.
+- Reasoning gives the inferred value with a confidence level: high when it is clearly visible, low when it is a best guess.
 
 **False positives to skip:**
 - `CLAUDE.md`, `README.md`, `index.md`, `MEMORY.md` (meta).
@@ -90,19 +92,19 @@ Suggested frontmatter:
 Action: add the suggested frontmatter
 ```
 
-**Auto-fix:** none in v0 — confidence too uncertain to auto-write frontmatter values.
+**Auto-fix:** none in v0. Confidence is too shaky to auto-write frontmatter values.
 
 ---
 
 ## G7.3 — H1 duplicating filename
 
-**Framework rule:** don't put a `# Title` heading that duplicates the filename.
+**Framework rule:** do not add a `# Title` heading that just repeats the filename.
 
 **Trigger heuristic:** read first non-frontmatter content line. If `# {Title}`, slugify both, compare.
 
 **Agent judgment:** confirm:
-- Is this a CLAUDE.md / README.md? Cross-check with F1.10 to avoid double-counting.
-- For READMEs at git repo root, the H1 may be intentional for GitHub display — flag with low severity, recommend keeping if user prefers GitHub render.
+- Is this a CLAUDE.md / README.md? Cross-check with F1.10 so you do not count it twice.
+- For READMEs at a git repo root, the H1 may be there on purpose for GitHub display → flag at low severity, recommend keeping it if the user wants the GitHub render.
 
 **Severity:** warn.
 
@@ -119,14 +121,14 @@ Action: remove the H1 and any blank line below
 
 ## G7.4 — Project README hygiene
 
-**Framework rule:** project READMEs should be the entry point with overview/status/next-steps; subtopics route to subdir files.
+**Framework rule:** a project README is the entry point. It carries overview, status, and next-steps, while subtopics route out to subdir files.
 
 **Trigger heuristic:** files matching `Projects/*/README.md` or `Projects/*/*/README.md`. Check sections (Overview/What, Status, Next/Roadmap) and size (<200B = sparse, >8KB = bloated).
 
 **Agent judgment:** for each candidate:
-- Read the README. What's there, what's missing?
-- For sparse: reasoning lists what the README actually says vs what a project entry-point needs.
-- For bloated: reasoning identifies the subtopics that should extract (e.g., research/, specs/, notes/).
+- Read the README. What is there, and what is missing?
+- Sparse case: reasoning lists what the README actually says against what a project entry-point needs.
+- Bloated case: reasoning names the subtopics that should extract out (research/, specs/, notes/).
 - Reasoning describes the right structure for THIS specific project.
 
 **Severity:** warn.
@@ -151,4 +153,4 @@ Action: extract {subtopic-A} → research/{slug}.md, {subtopic-B} → specs/{slu
 
 ## Finding schema
 
-Same shape as F1 — every finding has `reasoning`. See SKILL.md Step 2.4.
+Same shape as F1. Every finding carries a `reasoning` field. See SKILL.md Step 2.4.

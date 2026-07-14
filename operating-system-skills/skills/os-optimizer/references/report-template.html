@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -318,12 +319,12 @@
       <div class="stat fail">
         <h3>Critical</h3>
         <div class="num">{{TOTAL_FAIL}}</div>
-        <div class="sub">need manual review</div>
+        <div class="sub">need a manual look</div>
       </div>
       <div class="stat saved">
         <h3>Fixes Applied</h3>
         <div class="num">{{TOTAL_FIXED}} <span style="font-size:18px;opacity:0.5;">/ {{TOTAL_FIXABLE}}</span></div>
-        <div class="sub">{{TOTAL_SAVED}} tokens saved · {{TOTAL_FIXABLE_NOT_FIXED}} skipped</div>
+        <div class="sub">{{TOTAL_SAVED}} tokens saved · {{TOTAL_FIXABLE_NOT_FIXED}} left for next run</div>
       </div>
       <div class="stat">
         <h3>Annual Savings</h3>
@@ -334,7 +335,7 @@
 
     <div class="card">
       <h2>Per-Framework Summary</h2>
-      <p class="muted" style="margin: 0 0 14px;">Every framework runs every audit. Findings cite the framework rule. Detail sections below show top items per framework.</p>
+      <p class="muted" style="margin: 0 0 14px;">Every framework runs on every audit. Each finding cites the rule it came from. The detail sections below list the top items per framework.</p>
       <table class="summary">
         <thead>
           <tr>
@@ -363,20 +364,20 @@
         </tbody>
       </table>
       <p class="muted" style="margin: 14px 0 0; font-size: 12px;">
-        <strong>Fixable</strong> = findings whose check supports an auto-fix.
-        <strong>Fixed</strong> = how many of those were actually applied this run.
-        Gap = items the user skipped or denied (re-run the audit to revisit).
+        <strong>Fixable</strong> = findings whose check can produce an auto-fix.
+        <strong>Fixed</strong> = how many of those actually landed this run.
+        The gap is what the user held back or declined. Re-run the audit to revisit it.
       </p>
     </div>
 
     <section class="impact">
       <h2>Per-Session Impact</h2>
-      <p class="muted" style="margin: 0 0 14px;">What every Claude session in this vault now loads.</p>
+      <p class="muted" style="margin: 0 0 14px;">What every Claude session in this vault loads now.</p>
       <div class="row-grid">
         <div class="impact-card">
           <h3>Auto-Load Context</h3>
           <div class="num">{{SESSION_BEFORE}} → {{SESSION_AFTER}}</div>
-          <div class="sub">tokens loaded on every session start ({{SESSION_PCT}}% lighter)</div>
+          <div class="sub">tokens loaded at every session start ({{SESSION_PCT}}% lighter)</div>
         </div>
         <div class="impact-card annual">
           <h3>Compounding Effect</h3>

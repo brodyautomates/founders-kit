@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # F5 — Anthropic Memory (pass implementation)
 
 **Reference (the why):** `references/anthropic-managed-memory.md`.
@@ -5,7 +7,7 @@
 
 ## How this pass works
 
-Agentic. Size and filename checks have mechanical triggers but the agent reads each candidate to produce reasoning that explains *why* this specific file's size or name is a problem in the project's context. See F1's intro for the full pattern.
+Agentic. The size and filename checks have mechanical triggers, but the agent reads each candidate to produce reasoning that explains *why* this specific file's size or name is a problem in the project's context. See F1's intro for the full pattern.
 
 ## Contents
 
@@ -26,13 +28,13 @@ Agentic. Size and filename checks have mechanical triggers but the agent reads e
 **Trigger heuristic:** byte size; tokens ≈ bytes/4.
 
 **Agent judgment:** for each oversized candidate, read the file:
-- Is it one focused topic at length (a long reference doc, a transcript)? → flag with size reasoning but lower severity.
-- Is it multiple unrelated topics jammed together? → strong flag; reasoning identifies the topics by H2 headings.
-- Is it a transcript or raw source where length is structurally expected? → skip (transcripts have their own conventions).
+- Is it one focused topic covered at length (a long reference doc, a transcript)? Then flag it with size reasoning but lower severity.
+- Is it several unrelated topics jammed together? Then flag it hard, with reasoning that names the topics by their H2 headings.
+- Is it a transcript or raw source where length is structurally expected? Then skip it. Transcripts follow their own conventions.
 
 **False positives to skip:**
-- Files in `*transcripts*/` or marked `type: transcript`.
-- Files explicitly serving as long-form reference (e.g., Anthropic API docs cached locally).
+- Files inside `*transcripts*/` or marked `type: transcript`.
+- Files that explicitly serve as long-form reference (for example Anthropic API docs cached locally).
 
 **Severity:**
 - > 100KB or > 25K tokens → fail
@@ -52,17 +54,17 @@ Citation: anthropic-managed-memory.md → Architecture facts
 
 ## F5.2 — Topic mono-files
 
-**Framework rule:** multiple focused files > one mega-file.
+**Framework rule:** several focused files beat one mega-file.
 
 **Trigger heuristic:** count H2 headings in each file. >5 H2s → candidate.
 
 **Agent judgment:** for each candidate, read the H2 headings and a sentence from each section:
-- Are the H2s sub-topics of one cohesive theme (e.g., chapters of one guide)? → not mono-file; skip.
-- Are the H2s unrelated topics (e.g., "Stripe setup", "Email automation", "Onboarding flow")? → mono-file; flag.
-- Reasoning lists the H2s and judges whether splitting helps navigation.
+- Are the H2s sub-topics of one cohesive theme (for example chapters of a single guide)? Then it is not a mono-file. Skip it.
+- Are the H2s unrelated topics (for example "Stripe setup", "Email automation", "Onboarding flow")? Then it is a mono-file. Flag it.
+- The reasoning lists the H2s and judges whether splitting improves navigation.
 
 **False positives to skip:**
-- Reference docs where one big file is the canonical form (e.g., a single API reference).
+- Reference docs where one big file is the canonical form (for example a single API reference).
 - Index files that legitimately list many sub-topics.
 
 **Severity:** warn.
@@ -105,13 +107,13 @@ Action: split into {n} focused files: {suggested filenames per H2}
 ```
 
 **Agent judgment:** for each candidate, read the file:
-- What's it actually about? Reasoning proposes a descriptive slug based on actual content.
+- What is it actually about? The reasoning proposes a descriptive slug drawn from the real content.
 - Is it a stub that should be deleted instead of renamed? Cross-check with F2.7.
 - For `notes.md` files in personal-vault contexts where the user owns the folder organically, judge whether renaming would actually help.
 
 **False positives to skip:**
 - Date-named files (`\d{4}-\d{2}-\d{2}.*\.md`).
-- Numbered course/lesson files in obvious learning folders.
+- Numbered course or lesson files in obvious learning folders.
 
 **Severity:** warn.
 
@@ -136,9 +138,9 @@ Citation: anthropic-managed-memory.md → File-naming and structure
 
 **Agent judgment:** for each candidate folder:
 - Read 3–5 sample files. Are they obviously related (one content type) or mixed?
-- If mixed → strong flag; an index unifies them.
-- If they're date-indexed (e.g., daily notes), the agent's date-pattern recognition handles navigation; lower severity.
-- Reasoning explains what kind of index would help (a table of files vs a routing prose vs a CLAUDE.md per role).
+- If mixed, flag it hard. An index pulls them together.
+- If they are date-indexed (for example daily notes), the agent's date-pattern recognition already handles navigation. Lower severity.
+- The reasoning explains what kind of index would help: a table of files, routing prose, or a CLAUDE.md per role.
 
 **False positives to skip:**
 - Date-folders (Daily/, meetings/{type}/) where filenames are dates.
@@ -159,17 +161,17 @@ Action: create {index|README|CLAUDE}.md listing the files with one-line descript
 
 ## F5.5 — Date-naming consistency
 
-**Framework rule:** date-stamp time-sensitive content; the agent finds it by date.
+**Framework rule:** date-stamp time-sensitive content so the agent finds it by date.
 
-**Trigger heuristic:** for date-folders (`Daily/`, `**/meetings/`, `**/journal/`, `**/log/`), check direct-child filenames for `\d{4}-\d{2}-\d{2}` prefix.
+**Trigger heuristic:** for date-folders (`Daily/`, `**/meetings/`, `**/journal/`, `**/log/`), check direct-child filenames for a `\d{4}-\d{2}-\d{2}` prefix.
 
 **Agent judgment:** for each non-conforming file, read it:
-- Is it actually time-sensitive content that just wasn't dated? → flag, suggest the date from frontmatter or first-line metadata.
-- Is it a non-time index file that lives in the date folder by accident (e.g., a folder-level CLAUDE.md)? → suggest moving out of the date folder.
-- Reasoning describes the file's content type and the right destination.
+- Is it genuinely time-sensitive content that just was not dated? Then flag it, and suggest the date from frontmatter or first-line metadata.
+- Is it a non-time index file that landed in the date folder by accident (for example a folder-level CLAUDE.md)? Then suggest moving it out of the date folder.
+- The reasoning names the file's content type and the right destination.
 
 **False positives to skip:**
-- Index/README/CLAUDE.md files inside date folders (those route navigation, not events).
+- Index/README/CLAUDE.md files inside date folders (those route navigation, they are not events).
 
 **Severity:** warn.
 
@@ -186,7 +188,7 @@ Action: {specific: "rename to {YYYY-MM-DD}-{slug}.md (date inferred from {frontm
 
 ## F5.6 — Versioning check
 
-**Framework rule:** memory writes produce immutable named versions; vault analogues are git or Relay sync.
+**Framework rule:** memory writes produce immutable named versions; the vault analogues are git or Relay sync.
 
 **Trigger heuristic:**
 - `.git/` exists at vault root → versioned.
@@ -194,8 +196,8 @@ Action: {specific: "rename to {YYYY-MM-DD}-{slug}.md (date inferred from {frontm
 - Neither → candidate.
 
 **Agent judgment:** mostly mechanical, but the agent reads to:
-- Check `.gitignore` if `.git/` exists — is the vault actually being committed (not entirely ignored)?
-- Reasoning explains the audit-trail risk specific to this vault (e.g., "you have 80 files of substantive content with no rollback path; one bad bulk edit and content is lost").
+- Check `.gitignore` when `.git/` exists: is the vault actually being committed, or is it entirely ignored?
+- Explain in the reasoning the audit-trail risk specific to this vault (for example "you hold 80 files of substantive content with no rollback path; one bad bulk edit and the content is gone").
 
 **Severity:** warn.
 

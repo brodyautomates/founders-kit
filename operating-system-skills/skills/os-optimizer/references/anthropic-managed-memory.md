@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # Anthropic — Managed Agents Memory (April 2026)
 
 ## Contents
@@ -22,24 +24,24 @@
 
 ## Core thesis
 
-Memory in Anthropic's Managed Agents mounts as a **real filesystem at `/mnt/memory/`**. Claude reads and writes memory using **the same bash and file tools it already uses for everything else** — `cat`, `ls`, `Read`, `Write`. No new paradigm, no embedding model, no retrieval infrastructure.
+In Anthropic's Managed Agents, memory mounts as **a real filesystem at `/mnt/memory/`**. Claude reads and writes it with **the same bash and file tools it already uses for everything else** — `cat`, `ls`, `Read`, `Write`. There's no new paradigm, no embedding model, no retrieval infrastructure to stand up.
 
 > *"Files, not vectors. Claude reads and writes memory with the same bash and file tools it uses for everything else — no new paradigm, no embedding model, no retrieval infrastructure."*
 
-This is the production deployment of the same principle behind Karpathy's LLM Wiki and behind every working second-brain pattern: **markdown files in folders, navigated by name and structure, are the right substrate for compounding agent knowledge.**
+This ships the same principle that sits under Karpathy's LLM Wiki and under every second-brain pattern that actually works: **markdown files in folders, navigated by name and structure, are the right substrate for agent knowledge that compounds.**
 
 ## Why this validates the file-based vault
 
-For two years the prevailing assumption was that production agent memory required vector embeddings, RAG pipelines, and chunking strategies. April 2026: Anthropic shipped the opposite.
+For two years everyone assumed production agent memory meant vector embeddings, RAG pipelines, and chunking strategies. Then in April 2026 Anthropic shipped the opposite.
 
-The bet underneath this:
+Here is the bet underneath it:
 
-- **Compounding knowledge** (preferences, learnings, task history, structured patterns) is best served by named files an agent navigates explicitly.
-- **Similarity search across thousands of entries** still benefits from vector stores — but that's a different problem than memory.
-- **Files are debuggable.** A human can read `/mnt/memory/preferences.md` and know exactly what the agent will see. You can't do that with embeddings.
+- **Compounding knowledge** (preferences, learnings, task history, structured patterns) is best served by named files an agent walks to on purpose.
+- **Similarity search across thousands of entries** still wants vector stores, but that's a separate problem from memory.
+- **Files are debuggable.** A person can open `/mnt/memory/preferences.md` and see exactly what the agent will see. Embeddings give you nothing like that.
 - **Files are versionable** with standard tooling (git, diff, audit logs).
 
-For anyone running an Obsidian-based vault with Claude Code, this is the strongest possible signal that the architecture is right. The lab building the model also chose files.
+If you run an Obsidian-based vault alongside Claude Code, this is about as strong a signal as you get that the architecture is right. The lab that builds the model reached for files too.
 
 ## Architecture facts
 
@@ -72,26 +74,26 @@ For anyone running an Obsidian-based vault with Claude Code, this is the stronge
 
 ## Versioning and audit trail
 
-Every write to a memory file produces an **immutable named version** (`memver_…`). This gives:
+Each write to a memory file mints an **immutable named version** (`memver_…`). That buys you:
 
-- **Audit trail** — who/what wrote what, when
-- **Point-in-time recovery** — roll back to any prior version
-- **Redaction without destroying the chain** — mark a version as redacted while preserving subsequent versions
+- **Audit trail** — who or what wrote what, and when
+- **Point-in-time recovery** — roll back to any earlier version
+- **Redaction without breaking the chain** — mark a version redacted while every version after it stays intact
 
-This is the same pattern git provides for code. Anthropic explicitly modeled memory after version-controlled file systems.
+It's the same pattern git gives you for code. Anthropic modeled memory on version-controlled file systems on purpose.
 
-For vault analogues: a properly-managed Obsidian vault using git or Relay sync gets the same properties. The vault audit doesn't enforce versioning (that's the sync layer's job) but flags when a vault is *not* under version control.
+For vault analogues: an Obsidian vault kept under git or Relay sync gets the same properties. The vault audit doesn't enforce versioning (that belongs to the sync layer) but it flags a vault that is *not* under version control.
 
 ## Concurrency model
 
-Memory is **workspace-scoped**, not session-scoped. Multiple agents can attach to the same memory store simultaneously.
+Memory is **workspace-scoped**, not session-scoped. Many agents can attach to the same memory store at once.
 
 | Mode | When to use |
 |---|---|
 | **Read-only** | Sub-agents that only need context, never modify |
 | **Read-write** | Primary agents that update memory after task completion |
 
-Default conflict resolution: **last-write-wins**. For production:
+The default way conflicts resolve is **last-write-wins**. In production:
 
 ```python
 client.memory.create(
@@ -107,7 +109,7 @@ client.memory.create(
 )
 ```
 
-Without these guards, two concurrent writes can silently overwrite each other.
+Leave those guards off and two concurrent writes can quietly clobber each other.
 
 ## Where memory excels
 
@@ -118,27 +120,27 @@ Without these guards, two concurrent writes can silently overwrite each other.
 ✅ **Cross-session consistency** — same agent feels coherent across days
 ✅ **Auditable knowledge** — humans can inspect what the agent "remembers"
 
-These are exactly the kinds of content a CLAUDE.md, a per-team profile, or an `Intelligence/decisions/` log holds.
+This is precisely the kind of content that lives in a CLAUDE.md, a per-team profile, or an `Intelligence/decisions/` log.
 
 ## Where memory does NOT replace vector search
 
-❌ **Similarity search across thousands of entries.** "Find me all customer complaints similar to this one" needs embeddings, not file lookup.
+❌ **Similarity search across thousands of entries.** "Find me all customer complaints similar to this one" wants embeddings, not a file lookup.
 ❌ **Fuzzy semantic queries** over large corpora. Files navigate by name and folder, not by meaning.
-❌ **Cross-document concept extraction** at scale. RAG pipelines still win here.
-❌ **Real-time analytical queries.** Memory isn't a database.
+❌ **Cross-document concept extraction** at scale. RAG pipelines still take this one.
+❌ **Real-time analytical queries.** Memory is not a database.
 
-This is why hybrid stacks exist. Markdown for narrative + Postgres for entities + pgvector for similarity = the production pattern. Memory replaces *the narrative + preference layer*, not the analytical layer.
+That's the reason hybrid stacks exist. Markdown for narrative, Postgres for entities, pgvector for similarity: that's the production pattern. Memory covers *the narrative and preference layer*, not the analytical one.
 
 ## Reported early-adopter results
 
-Anthropic's launch post and follow-up coverage cited:
+Anthropic's launch post and the follow-up coverage named:
 
 - **Netflix**
 - **Rakuten**
 - **Wisedocs**
 - **Ando**
 
-Reported outcomes for document verification workflows:
+Reported outcomes on document verification workflows:
 - *"97 percent reduction in first-pass errors"*
 - *"30 percent speed increase"*
 
@@ -148,7 +150,7 @@ Source: launch post, summarized by buildfastwithai.com, SDTimes, EdTech Innovati
 
 ## File-naming and structure guidance
 
-Naming matters because the agent navigates by name. From the launch guidance:
+Names carry weight because the agent finds things by name. From the launch guidance:
 
 ✅ **Good names:**
 - `preferences.md`
@@ -164,7 +166,7 @@ Naming matters because the agent navigates by name. From the launch guidance:
 - `untitled.md`
 - `file-1.md`
 
-The same principle applies to vault files: descriptive, dated where appropriate, no ambiguous numbering.
+The same rule holds for vault files: descriptive, dated where it helps, and no ambiguous numbering.
 
 ### Recommended structure
 
@@ -182,29 +184,29 @@ The same principle applies to vault files: descriptive, dated where appropriate,
 └── learnings.md          # corrections accumulated over time
 ```
 
-In a vault: `Context/`, `Team/`, `Projects/`, plus a top-level routing CLAUDE.md is the same pattern with vault-flavored names.
+In a vault the same pattern shows up with vault-flavored names: `Context/`, `Team/`, `Projects/`, plus a top-level routing CLAUDE.md.
 
 ## Dos
 
-- Split memory into focused files; keep each <10KB.
-- Use descriptive filenames the agent can find by name (not `notes-2.md`).
+- Split memory into focused files; keep each under 10KB.
+- Give files descriptive names the agent can find by name (not `notes-2.md`).
 - Use `content_sha256` precondition checks in production.
 - Treat memory as workspace-shared infrastructure.
-- Inject a top-level index file (`INDEX.md` or `MEMORY.md`) so the agent can navigate.
-- Use date-stamped filenames for time-sensitive content (logs, reports).
-- Treat memory writes like git commits — descriptive, atomic, easy to audit.
+- Drop in a top-level index file (`INDEX.md` or `MEMORY.md`) so the agent can navigate.
+- Date-stamp filenames for time-sensitive content (logs, reports).
+- Handle memory writes like git commits: descriptive, atomic, easy to audit.
 - Match the file structure to how a human would organize the same content.
 
 ## Don'ts
 
-- Don't put everything in one file. The 100KB cap is a ceiling, not a target.
+- Don't cram everything into one file. The 100KB cap is a ceiling, not a target.
 - Don't expect vector-style semantic search.
 - Don't attach memory mid-session. Attach at creation only.
-- Don't rely on last-write-wins under concurrency. Use `content_sha256`.
+- Don't trust last-write-wins under concurrency. Use `content_sha256`.
 - Don't use ambiguous filenames. The agent navigates by name.
-- Don't store transactional/relational data in memory. Use a database.
+- Don't store transactional or relational data in memory. Use a database.
 - Don't store binary blobs or large files. Memory is for structured text.
-- Don't skip the index file. Without it, the agent doesn't know what's available.
+- Don't skip the index file. Without it the agent doesn't know what's there.
 
 ## Verbatim quotes
 
@@ -214,15 +216,15 @@ In a vault: `Context/`, `Team/`, `Projects/`, plus a top-level routing CLAUDE.md
 
 ## Auditable signals
 
-When this skill runs Pass 1 (size) and Pass 9 (anti-patterns) for memory-style files in a vault:
+When this skill runs Pass 1 (size) and Pass 9 (anti-patterns) against memory-style files in a vault:
 
-- **Per-file size**: flag any file > 100KB or > 25K tokens (out of memory-style budget for any single file).
-- **Sub-budget**: flag > 10KB as "split candidate" — too large for the recommended per-file size.
-- **Topic mono-files**: detect single files holding multiple unrelated topics. Heuristic: count distinct h2 headers; flag if a file has >5 unrelated h2 sections, suggesting it should be split.
+- **Per-file size**: flag any file > 100KB or > 25K tokens (over the memory-style budget for a single file).
+- **Sub-budget**: flag > 10KB as a "split candidate" — past the recommended per-file size.
+- **Topic mono-files**: catch single files carrying several unrelated topics. Heuristic: count distinct h2 headers; flag a file with >5 unrelated h2 sections as a split candidate.
 - **File-naming descriptiveness**: flag files matching ambiguous patterns: `notes\d*\.md`, `untitled.*\.md`, `temp.*\.md`, `file-\d+\.md`, `new-document.*\.md`.
-- **Memory index presence**: in any folder containing >5 files, flag if there's no `index.md`, `INDEX.md`, `MEMORY.md`, or `README.md` to navigate by name.
-- **Date-naming consistency**: in folders that should be dated (Daily/, Intelligence/meetings/), flag files that don't follow the `YYYY-MM-DD` prefix.
-- **Versioning**: flag if the vault is not under git or some sync layer (Relay, etc.). No versioning = no audit trail = no rollback.
+- **Memory index presence**: in any folder with >5 files, flag the absence of an `index.md`, `INDEX.md`, `MEMORY.md`, or `README.md` to navigate by name.
+- **Date-naming consistency**: in folders that should be dated (Daily/, Intelligence/meetings/), flag files that skip the `YYYY-MM-DD` prefix.
+- **Versioning**: flag a vault that isn't under git or some sync layer (Relay, etc.). No versioning means no audit trail and no rollback.
 
 ## Sources
 

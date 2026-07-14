@@ -1,8 +1,9 @@
 {
   "name": "brody-ai-os",
-  "description": "Turn any folder into a working AI operating system: a persistent context layer (your second brain) plus agents that build it, run it, optimize it, share it across a team, and reach it from anywhere. Ships /os-setup, /os-operator, /os-optimizer, /team-os, and /os-mcp. Works solo or for teams.",
+  "description": "Turn any folder into a working AI operating system: a persistent context layer plus agents that stand it up, run it, optimize it, share it across a team, and reach it from anywhere. Ships /os-setup, /os-operator, /os-optimizer, /team-os, and /os-mcp. Solo or team.",
   "version": "1.0.0",
   "author": {
     "name": "Brody Glanville"
-  }
+  },
+  "license": "SEE LICENSE FILE"
 }

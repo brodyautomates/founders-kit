@@ -17,7 +17,7 @@ updated: [YYYY-MM-DD]
 - [who you serve]
 
 ## Key Metrics
-- [what you measure — revenue, users, etc.]
+- [what you measure: revenue, users, etc.]
 
 ## Competitive Position
 - [how you differentiate]

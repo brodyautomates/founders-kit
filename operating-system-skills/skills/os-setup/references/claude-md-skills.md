@@ -12,7 +12,7 @@ Skills/{skill-name}/
 
 ## Rules
 
-- One folder per skill. Folder name matches the skill slug (kebab-case).
+- One folder per skill. The folder name matches the skill slug (kebab-case).
 - `notes.md` is for short, operator-voiced guidance the skill should respect.
 - `references/` is for examples and longer reference material the skill loads on demand.
 - Don't duplicate the skill's own SKILL.md content here. This folder is for *your* customization.

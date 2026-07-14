@@ -1,169 +1,161 @@
 ---
 name: team-os
-description: Install the Brody AI Relay fork in an Obsidian vault as the foundation for a shared Team OS — replaces the official Relay (`system3-relay`) plugin with the Brody AI fork (`brody-relay-fork`) which ships custom RBAC + access controls for team-wide vault sharing. Bundled production build ships inside the skill — user just points to their Obsidian vault path. Use when the user wants to "set up team os", "install Brody AI Relay", "swap relay for the fork", "replace the official relay plugin", or "use Brody AI's relay in my vault".
+description: Turn an Obsidian vault into a shared Team OS by installing the upstream open-source Relay plugin (by System3, https://system3.md) and configuring it for team-wide sharing with roles and access control (RBAC). Relay is a third-party tool under its own license, installed by the user from Obsidian's community plugin store. Use when the user wants to "set up team os", "share a vault with my team", "add roles and access control to Obsidian", "set up shared and private folders", or "give teammates read or write access to a vault".
 ---
 
-# Team OS — Shared Vault via the Relay Fork
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
 
-This skill turns a single-user vault into a shared team workspace. It swaps the stock Relay sync plugin (`system3-relay`) for a forked build (`brody-relay-fork`) that layers role-based permissions on top, so different teammates see different parts of the vault. The compiled fork ships with the skill at `${CLAUDE_PLUGIN_ROOT}/skills/team-os/reference/brody-relay-fork/` (`main.js`, `manifest.json`, `styles.css`) — always copy from there, never fetch it elsewhere.
+# Team OS: Shared Vault with Roles and Access Control
+
+This skill turns one Obsidian vault into the shared workspace for a team. Everyone works in the same vault, changes sync in real time, and you decide who sees what and who can edit what.
+
+The sync engine is Relay, an open-source Obsidian plugin built by System3 (https://system3.md). Relay is a third-party product under its own license. The Brody Operating System does not ship or modify Relay. The user installs it directly from Obsidian's community plugin store, then this skill walks them through configuring it for team sharing with roles and access control.
 
 ## What the user provides
 
-**Just their Obsidian vault folder** — the one they open inside Obsidian itself. The skill will auto-detect it if they invoke `/team-os` from inside the vault, otherwise it'll walk them through finding it via Obsidian's Settings → About → "Show vault folder".
+**Their Obsidian vault folder**: the one they open inside Obsidian. This is the vault they want the team to share.
 
-Example paths the user might give: `~/Documents/MyVault`, `/Users/jane/Obsidian/Work`, or a folder dragged from Finder/Explorer. The skill normalizes all of them.
+If the user runs `/team-os` from inside the vault, auto-detect it. Otherwise walk them through finding it: in Obsidian, Settings then About then "Show vault folder", or right-click the vault name in the switcher and choose "Reveal in Finder/Explorer".
+
+Paths look like `~/Documents/MyVault`, `/Users/jane/Obsidian/Work`, or `C:\Users\jane\Documents\MyVault`. The right folder is the one with a hidden `.obsidian` folder directly inside it, not the parent above it.
 
 ---
 
 # Workflow
 
-## Step 0 — Confirm intent + locate the vault folder
+## Step 0: Explain what this does and locate the vault
 
-Tell the user what this will do, in plain language:
+Tell the user in plain language what is about to happen:
 
-> I'm about to replace the official Relay plugin with the Brody AI fork in your Obsidian vault. The fork has custom RBAC + access controls. This will:
-> 1. Delete the old `system3-relay` plugin if it's there.
-> 2. Install the bundled Brody AI Relay build.
-> 3. Update Obsidian's community-plugins config to switch over.
+> I'm going to help you turn this Obsidian vault into a shared Team OS. You'll install the Relay plugin, connect the vault to a shared "Relay", invite your team, and set roles so people only see and edit what they should. Relay is a free open-source plugin by System3. You install it yourself from Obsidian's community store, and I'll walk you through the setup.
+
+### Get the vault folder
+
+Try this order:
+
+**1. Check the current working directory.** If the cwd contains a `.obsidian/` folder, ask:
+
+> This folder (`{cwd}`) is already an Obsidian vault. Is this the one you want to share with your team? (yes / no)
+
+If yes, set `VAULT="$(pwd)"` and continue.
+
+**2. Otherwise ask in plain language:**
+
+> Where is your Obsidian vault, the folder you open inside Obsidian?
 >
-> **Close Obsidian first** — modifying plugin files while it's running can corrupt the install.
+> The easy way to find it: open Obsidian, go to Settings then About, and click "Show vault folder". Drag that folder in here or paste its path.
+> - On macOS it usually looks like `/Users/yourname/Documents/MyVault`.
+> - On Windows it usually looks like `C:\Users\yourname\Documents\MyVault`.
+> - It's the folder with a hidden `.obsidian` folder inside it.
 
-### Get the vault folder (no jargon)
+Accept a pasted path, a dragged folder, or "I don't know" (in which case walk them through the Obsidian UI step). Normalize whatever they give you: strip quotes, expand `~`, drop the trailing slash. Save as `VAULT`. Do not continue until `VAULT` is set.
 
-Don't ask for an "absolute path". Most users don't think in those terms. Try this order:
-
-**1. Try the current working directory first.**
-
-If the cwd contains a `.obsidian/` folder, ask:
-
-> I see this folder (`{cwd}`) is already an Obsidian vault. Is this the one you want to install Brody AI Relay into? (yes / no — I'll ask where it is)
-
-If yes, set `VAULT="$(pwd)"` and skip to Step 1.
-
-**2. Otherwise, ask in plain language with platform-specific hints.**
-
-`AskUserQuestion` framed like:
-
-> Where is your Obsidian vault — the folder you open inside Obsidian itself?
->
-> Easiest way to find it:
-> - **Open Obsidian** → Settings → "About" → click **"Show vault folder"** (or right-click your vault name in the vault switcher → "Reveal in Finder/Explorer"). Drag that folder into this chat, or copy its path.
-> - On **macOS** it usually looks like `/Users/yourname/Documents/MyVault` or `~/Obsidian/MyVault`.
-> - On **Windows** it usually looks like `C:\Users\yourname\Documents\MyVault`.
-> - The folder you want is the one with a hidden `.obsidian` subfolder inside it (not the Documents folder above it).
-
-Accept any of:
-- A pasted path (with or without quotes, `~` expansion, trailing slash).
-- A folder dragged-and-dropped (which the terminal usually expands to a path).
-- "I don't know" → walk the user through the Obsidian UI step ("Settings → About → Show vault folder").
-
-Normalize whatever they give you: strip surrounding quotes, expand `~`, drop trailing `/`. Save as `VAULT`.
-
-Do not proceed until `VAULT` is set.
-
-## Step 1 — Verify it's a valid Obsidian vault
+## Step 1: Verify it's a valid Obsidian vault
 
 ```bash
 VAULT="<paste>"
 test -d "$VAULT/.obsidian" || echo "NOT_A_VAULT"
 ```
 
-If `NOT_A_VAULT` prints, tell the user the path doesn't contain `.obsidian/` and ask them to re-check. Do not proceed.
+If `NOT_A_VAULT` prints, the path points at the wrong folder or the parent. Ask the user to re-check using Settings then About then "Show vault folder". Do not continue.
 
-## Step 2 — Snapshot current plugins
+## Step 2: Install Relay from Obsidian's community store
+
+Relay installs the normal way, from inside Obsidian. Guide the user:
+
+> 1. Open Obsidian and open this vault.
+> 2. Go to Settings then "Community plugins". If you see a Safe Mode banner, click "Turn on community plugins".
+> 3. Click "Browse", search for **Relay**, and install the one by **System3**.
+> 4. Click "Enable".
+> 5. In the left sidebar or Settings, open Relay and create an account or sign in.
+
+You can confirm it landed by checking the vault (with Obsidian closed, so files aren't mid-write):
 
 ```bash
 ls "$VAULT/.obsidian/plugins/" 2>/dev/null
 cat "$VAULT/.obsidian/community-plugins.json" 2>/dev/null
 ```
 
-Show the user what's there. If `community-plugins.json` doesn't exist, that's fine — Obsidian creates it on first community plugin install. We'll handle both cases.
+You should see a Relay plugin folder listed and Relay's id present in the enabled list. If it isn't there yet, the user hasn't finished the install and enable step above.
 
-Confirm with the user before proceeding:
-- If `system3-relay` is present, we'll remove it.
-- If `brody-relay-fork` already exists, we'll overwrite it (warn and ask).
+Relay's exact plugin folder name is set by System3, so match on the folder that contains Relay's `manifest.json` naming System3 as the author rather than assuming a fixed id.
 
-## Step 3 — Confirm Obsidian is closed
+## Step 3: Create a Relay and attach this vault
 
-```bash
-pgrep -x Obsidian && echo "OBSIDIAN_RUNNING"
-```
+A "Relay" is Relay's term for a shared space that one or more vaults connect to. The person setting this up is the owner.
 
-If `OBSIDIAN_RUNNING`, stop and tell the user to quit Obsidian (Cmd+Q on macOS), then re-run. Do not proceed while it's running.
+Guide the user:
 
-## Step 4 — Remove the official plugin (if present)
+> 1. In Obsidian, open the Relay panel.
+> 2. Choose "Create a Relay" and give it a name your team will recognize, like your company or project name.
+> 3. Attach this vault to the Relay. Relay will start syncing the vault's contents to everyone you invite.
 
-```bash
-if [ -d "$VAULT/.obsidian/plugins/system3-relay" ]; then
-  rm -rf "$VAULT/.obsidian/plugins/system3-relay"
-  echo "Removed system3-relay"
-fi
-```
+The owner controls the Relay. Keep ownership on the account that should have final say over membership and billing.
 
-This is destructive — that's why Step 0 told the user upfront. If the user has unsaved local changes inside that plugin's folder (rare; usually it's just compiled build artifacts), they should back it up first.
+## Step 4: Decide the folder structure before inviting anyone
 
-## Step 5 — Install the fork from the skill bundle
+Access control is easiest when the vault is organized around who should see what. Plan the folders first, then invite people into the right level.
 
-```bash
-SRC="${CLAUDE_PLUGIN_ROOT}/skills/team-os/reference/brody-relay-fork"
-DST="$VAULT/.obsidian/plugins/brody-relay-fork"
+A clean pattern:
 
-mkdir -p "$DST"
-cp "$SRC/main.js" "$SRC/manifest.json" "$SRC/styles.css" "$DST/"
-ls -la "$DST"
-```
+- `Shared/`: everything the whole team should see and work in. Playbooks, active projects, team notes.
+- `Reference/`: read-only material the team consumes but shouldn't change. SOPs, brand assets, finalized docs.
+- `Private/`: the owner's own working area that stays out of the shared Relay, or lives in a separate Relay only the owner is in.
 
-You should see the three files (`main.js`, `manifest.json`, `styles.css`) at the destination.
-
-## Step 6 — Update `community-plugins.json`
-
-Obsidian uses this file to track which community plugins are enabled. We need to:
-- Remove `system3-relay` from the enabled list.
-- Add `brody-relay-fork` to the enabled list.
+Set this up as folders in the vault first. Have the user create them in Obsidian (or create them directly if Obsidian is closed):
 
 ```bash
-CFG="$VAULT/.obsidian/community-plugins.json"
-if [ ! -f "$CFG" ]; then echo '[]' > "$CFG"; fi
-
-python3 - <<PY
-import json, pathlib
-p = pathlib.Path("$CFG")
-data = json.loads(p.read_text() or "[]")
-data = [x for x in data if x != "system3-relay"]
-if "brody-relay-fork" not in data:
-    data.append("brody-relay-fork")
-p.write_text(json.dumps(data, indent=2) + "\n")
-print("community-plugins.json:", data)
-PY
+mkdir -p "$VAULT/Shared" "$VAULT/Reference"
+echo "Created Shared/ and Reference/"
 ```
 
-## Step 7 — Verify
+Keep truly private material out of the shared Relay entirely. The reliable way to keep something private is to not attach it to a shared Relay, rather than relying only on a permission toggle.
 
-```bash
-test -f "$VAULT/.obsidian/plugins/brody-relay-fork/main.js" && echo "INSTALLED OK"
-grep -q "brody-relay-fork" "$VAULT/.obsidian/community-plugins.json" && echo "ENABLED OK"
-test ! -d "$VAULT/.obsidian/plugins/system3-relay" && echo "OFFICIAL REMOVED OK"
-```
+## Step 5: Invite the team and assign roles
 
-All three should print `OK`.
+Relay handles invitations and per-person access from its panel. Roles map to what each person should be able to do.
 
-## Step 8 — Tell the user how to finish
+Guide the user:
 
-> Done. Open Obsidian and load this vault. The Brody AI Relay plugin should be active. If you don't see it:
-> - Settings → Community plugins → confirm "Brody AI Relay" is toggled on.
-> - If Obsidian shows a "safe mode" banner, click "Trust author and enable" or disable safe mode in Settings → Community plugins.
-> - Sign in with your Relay.md credentials when prompted.
+> 1. In the Relay panel, open the members or sharing section for your Relay.
+> 2. Invite each teammate by email or invite link.
+> 3. For each person, set their role.
+
+Use these roles as the model:
+
+- **Owner**: the person who created the Relay. Full control: membership, roles, billing, and every folder. Keep this to one or two trusted people.
+- **Editor**: can read and write in the shared folders. This is the default for working team members who create and edit notes.
+- **Viewer**: read-only. Can open and read shared material but can't change it. Use this for people who only consume Reference material, or for stakeholders who should see progress without editing.
+
+Match the role to the folder plan from Step 4. Working teammates get Editor on `Shared/`. People who only need to read get Viewer. Anyone who shouldn't see a given area simply isn't given access to it.
+
+Relay's exact labels and the granularity of folder-level versus Relay-level permissions are set by System3 and may change between versions. Read the current options in the Relay panel and map them onto Owner, Editor, and Viewer. If Relay only offers Relay-wide roles in the user's version, use separate Relays for material that needs different audiences: one Relay for the whole team, a second Relay for a smaller group.
+
+## Step 6: Verify the setup
+
+Confirm the shared vault is working end to end:
+
+> 1. Have one teammate accept their invite and open the Relay in their own Obsidian.
+> 2. Create a test note in `Shared/` on the owner's side and confirm it appears for the teammate within a few seconds.
+> 3. Have a Viewer confirm they can read but not edit.
+> 4. Confirm nobody outside the intended group can see `Private/` material.
+
+Once a change made on one machine shows up on another and the roles behave as expected, the Team OS is live.
 
 ---
 
 # Troubleshooting
 
-**`NOT_A_VAULT`** — the path is wrong, or it's pointing at a parent. The right folder is the one that has a hidden `.obsidian` folder inside it directly (e.g. `~/Documents/MyVault`, not `~/Documents`). Easiest way to find it: open Obsidian → Settings → About → "Show vault folder".
+**`NOT_A_VAULT`.** The path points at the wrong folder or the parent. The right folder has a hidden `.obsidian` folder directly inside it. Find it via Obsidian, Settings, About, "Show vault folder".
 
-**Plugin doesn't appear in Obsidian.** Check `.obsidian/community-plugins.json` — it must contain `"brody-relay-fork"`. Restart Obsidian.
+**Relay doesn't appear after install.** Confirm community plugins are turned on (Settings then Community plugins, disable Safe Mode) and that Relay is toggled Enabled. Restart Obsidian. Check that Relay's plugin id is present in `.obsidian/community-plugins.json`.
 
-**Obsidian shows "Failed to load plugin".** The bundled `main.js` may be incompatible with the user's Obsidian version. Check `manifest.json`'s `minAppVersion` against Obsidian's "About" panel. The bundled fork requires Obsidian 0.15.0+.
+**Teammate can't see the shared notes.** Confirm they accepted the invite, signed into their Relay account, and attached the shared Relay to a vault on their machine. Sync only flows once their vault is joined to the Relay.
 
-**User wants to revert to upstream Relay.** Remove `<vault>/.obsidian/plugins/brody-relay-fork/`, edit `community-plugins.json` to remove `brody-relay-fork`, then install `system3-relay` from the Obsidian community plugins store normally.
+**Changes aren't syncing.** Both people need Obsidian open with the Relay connected. Check the Relay panel for a connection or status indicator. A dropped connection pauses sync until it reconnects.
 
-**Want to update the bundled fork later.** The plugin is built into this skill — to update, the maintainer rebuilds `relay-fork`, copies the three artifacts into `shared-skills/team-os/reference/brody-relay-fork/`, runs `./sync-skills.sh && ./build-zips.sh`, and republishes.
+**Someone can edit something they shouldn't.** Re-check their role in the Relay panel. If Relay only offers Relay-wide roles in this version, move the sensitive material into a separate Relay that only the right people belong to.
+
+**Private material showing up for the team.** Anything attached to the shared Relay is shared. To keep something private, keep it out of the shared Relay: either don't attach that folder, or put it in a separate owner-only Relay or a separate local vault.
+
+**Licensing and updates.** Relay is a third-party open-source plugin by System3 (https://system3.md), distributed under its own license and updated by System3 through Obsidian's community plugin store. Updates, account features, and any paid tiers are governed by System3, not by The Brody Operating System. Update it the normal way, through Obsidian's community plugin updates.

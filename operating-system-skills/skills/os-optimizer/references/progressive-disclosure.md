@@ -1,3 +1,5 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # Progressive disclosure — Anthropic skill best practices
 
 ## Contents
@@ -28,9 +30,9 @@
 
 > *"The context window is a public good. Your Skill shares the context window with everything else Claude needs to know."*
 
-Skills must be **discoverable cheaply** (metadata only, ~30–50 tokens per skill) and load detail only when triggered. The mechanism: **three tiers of progressive disclosure**.
+A skill has to stay **cheap to discover** (metadata only, ~30–50 tokens per skill) and pull in its detail only when it gets triggered. The mechanism is **three tiers of progressive disclosure**.
 
-This pattern is what lets a Claude Code installation have 100+ skills without choking on startup. Only 30–50 tokens × 100 skills = ~5K tokens is paid upfront. Each individual SKILL.md body (often 200–500 lines / ~2K–5K tokens) loads only when relevant.
+This pattern is what lets a Claude Code install carry 100+ skills without choking at startup. 30–50 tokens × 100 skills = ~5K tokens paid upfront. Each individual SKILL.md body, often 200–500 lines / ~2K–5K tokens, loads only when it becomes relevant.
 
 ## The three-tier loading model
 
@@ -40,7 +42,7 @@ This pattern is what lets a Claude Code installation have 100+ skills without ch
 | **L2: SKILL.md body** | Main instructions | When Claude judges the skill **relevant** to the prompt | Loaded once when triggered (entire body) |
 | **L3: References / scripts** | `references/*.md`, executable scripts | **On demand**, only when SKILL.md links to them and Claude reads them | Zero context until accessed |
 
-The same pattern applies to:
+The same pattern shows up in:
 - **MCP tools** — only tool names load at startup; full schemas defer
 - **Path-scoped CLAUDE.md rules** — `.claude/rules/*.md` with `paths:` frontmatter only load when matching files are read
 - **Subdirectory CLAUDE.md** — only loads when Claude works in that directory
@@ -53,9 +55,9 @@ Anthropic publishes rough numbers:
 - **L2 (SKILL.md body):** typically 200–500 lines (~2K–5K tokens). Loaded when triggered.
 - **L3 (references):** unbounded. Loaded only when read.
 
-For comparison, a typical 200K-token Claude Code session loads ~8K of overhead at startup (system prompt + memory + skills metadata + CLAUDE.md). That's 4% of the window — leaving 96% for the actual conversation.
+For comparison, a typical 200K-token Claude Code session loads ~8K of overhead at startup (system prompt + memory + skills metadata + CLAUDE.md). That's 4% of the window, so 96% is left for the actual conversation.
 
-If you broke the progressive disclosure pattern (e.g., loaded all SKILL.md bodies upfront), 30 skills × 3K tokens = 90K. Half the window gone before the first user message.
+Break the progressive disclosure pattern (say, load every SKILL.md body upfront) and 30 skills × 3K tokens = 90K. Half the window is gone before the first user message.
 
 ## Hard rules — frontmatter
 
@@ -92,13 +94,13 @@ Failure modes:
 
 > *"Keep references one level deep from SKILL.md."*
 
-This is the rule most often broken. The hierarchy:
+This is the rule people break most. Here is the hierarchy:
 
 ✅ **Allowed:** `SKILL.md` → `references/foo.md`
 ❌ **Broken:** `SKILL.md` → `references/foo.md` → `references/bar.md`
 ❌ **Broken:** `SKILL.md` → `references/index.md` → `references/foo.md`
 
-Why: deeper nesting causes Claude to use **partial reads** (`head -100`) and miss content. References must be reachable in one hop so Claude reads the whole file when it needs it.
+Here is why: deeper nesting pushes Claude toward **partial reads** (`head -100`), and it misses content. A reference has to be reachable in one hop so Claude reads the whole file when it needs it.
 
 Other reference rules:
 
@@ -125,11 +127,11 @@ Other reference rules:
 - `data`
 - `manager`
 
-Specific, action-oriented names help Claude select the right skill from 100+ available.
+Specific, action-oriented names help Claude pick the right skill out of 100+ available.
 
 ## Description authoring
 
-The description is **the single most important field** — it's how Claude decides whether to load the skill body.
+The description is **the single most important field**. It is how Claude decides whether to load the skill body.
 
 > *"Each Skill has exactly one description field. The description is critical for skill selection: Claude uses it to choose the right Skill from potentially 100+ available Skills."*
 
@@ -157,7 +159,7 @@ Specific, multi-phrased triggers, requirement called out.
 
 ## Degrees of freedom matched to fragility
 
-Different operations need different levels of constraint:
+Different operations call for different levels of constraint:
 
 | Freedom level | Form | Use when |
 |---|---|---|
@@ -165,7 +167,7 @@ Different operations need different levels of constraint:
 | **Medium** | Pseudocode, parameterized scripts | A preferred pattern exists, but variation is OK |
 | **Low** | Specific scripts with no parameters | Fragile/critical operations (e.g., DB migrations, security checks) |
 
-Match the form to the fragility. Don't write rigid scripts for creative tasks. Don't write loose text for tasks where deviation breaks production.
+Fit the form to the fragility. Skip rigid scripts for creative tasks. Skip loose text for tasks where any deviation breaks production.
 
 ## Pattern examples
 
@@ -192,7 +194,7 @@ references/
 └── operations.md
 ```
 
-A sales-related query never loads finance reference. Cleanest progressive disclosure.
+A sales-related query never loads the finance reference. Cleanest progressive disclosure.
 
 ### Pattern 3: Conditional details
 
@@ -202,7 +204,7 @@ references/
 └── advanced.md   # Linked from SKILL.md when "advanced" cases come up
 ```
 
-Most common case is in the body; edge cases are linked.
+The common case sits in the body; edge cases get linked.
 
 ## Build evals first
 
@@ -215,18 +217,18 @@ The evals tell you:
 - Whether the SKILL.md body is clear enough for the model to follow
 - Where the skill currently fails
 
-Without evals, you're guessing.
+Skip the evals and you are guessing.
 
 ## Test across model tiers
 
 > *"What works for Opus may need more detail for Haiku."*
 
-A skill that works on Opus 4.7 may fail on Haiku 4.5 because:
+A skill that runs on Opus 4.7 can fail on Haiku 4.5 because:
 - Haiku has less reasoning headroom for vague instructions
 - Haiku follows fewer simultaneous instructions
 - Haiku may need more explicit examples
 
-Test at least: Haiku, Sonnet, Opus. If the skill is intended for production use across model tiers, this is non-optional.
+Test at least Haiku, Sonnet, and Opus. For a skill meant for production across model tiers, this is required.
 
 ## Anthropic's verbatim 21-item checklist
 
@@ -254,7 +256,7 @@ Reproduced from the official skill best practices page:
 - [ ] Tested with Haiku, Sonnet, and Opus
 - [ ] Tested with real usage scenarios
 
-This checklist is what the vault-audit skill's Pass 8 partially encodes. Some items are programmatically auditable (size, references depth, paths); some require human review (eval count, model testing, scenario testing).
+This checklist is what the vault-audit skill's Pass 8 partially encodes. Some items are programmatically auditable (size, references depth, paths); some need human review (eval count, model testing, scenario testing).
 
 ## Why this matters for vaults
 
@@ -266,7 +268,7 @@ The progressive disclosure pattern is **the same architecture** the vault uses, 
 | L2 SKILL.md body (on relevance) | Per-folder CLAUDE.md (loads when Claude works in that folder) |
 | L3 references (on demand) | Specific notes Claude reads when answering a query |
 
-This is why a well-designed vault and a well-designed skill suite share principles:
+That shared shape is why a well-designed vault and a well-designed skill suite run on the same principles:
 
 - Lean root / lean SKILL.md
 - Per-folder details / per-domain references
@@ -274,19 +276,19 @@ This is why a well-designed vault and a well-designed skill suite share principl
 - Specific descriptions and naming
 - The whole thing tested under load
 
-When the skill audits a vault, it's checking the same patterns Anthropic uses to audit skills.
+When the skill audits a vault, it checks the same patterns Anthropic uses to audit skills.
 
 ## Dos
 
-- Pre-load only metadata; defer body and references.
+- Pre-load only metadata; defer the body and references.
 - Keep SKILL.md ≤500 lines.
 - Keep references one level deep.
-- Add TOC to reference files >100 lines.
+- Add a TOC to reference files >100 lines.
 - Write descriptions in third person with explicit triggers.
-- Use gerund-form action-oriented names.
-- Use forward slashes everywhere (even Windows).
+- Use gerund-form, action-oriented names.
+- Use forward slashes everywhere, Windows included.
 - Build evals first (≥3 per skill).
-- Test across Haiku, Sonnet, Opus.
+- Test across Haiku, Sonnet, and Opus.
 - Match degrees of freedom to fragility (rigid scripts for fragile ops; loose text for creative ones).
 - Use `<details>` blocks for legacy/old patterns.
 - Always fully qualify MCP tools (`ServerName:tool_name`).
@@ -295,17 +297,17 @@ When the skill audits a vault, it's checking the same patterns Anthropic uses to
 ## Don'ts
 
 - Don't nest references more than one level (`SKILL.md → adv.md → details.md` is broken).
-- Don't include time-sensitive dates inline ("After August 2025…") outside `<details>`.
+- Don't drop time-sensitive dates inline ("After August 2025…") outside `<details>`.
 - Don't use vague names: `helper`, `utils`, `tools`.
-- Don't use first/second person in descriptions.
-- Don't include reserved words ("anthropic", "claude") in skill names.
-- Don't punt errors to Claude in scripts; handle explicitly.
+- Don't use first or second person in descriptions.
+- Don't put reserved words ("anthropic", "claude") in skill names.
+- Don't punt errors to Claude in scripts; handle them explicitly.
 - Don't use magic numbers without `# why` comments.
 - Don't write SKILL.md bodies >500 lines.
 - Don't skip evals.
 - Don't ship without testing on at least Haiku and Sonnet.
 - Don't use Windows-style backslash paths.
-- Don't present 5 alternatives without picking a default.
+- Don't lay out 5 alternatives without picking a default.
 
 ## Verbatim quotes
 

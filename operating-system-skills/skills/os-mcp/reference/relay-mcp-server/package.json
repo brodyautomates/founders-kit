@@ -1,7 +1,7 @@
 {
-  "name": "relay-mcp-server-v2",
-  "version": "2.0.0-dev",
-  "description": "OAuth-enabled MCP server bridging Claude to the Obsidian vault via System 3 Relay",
+  "name": "brody-os-mcp-server",
+  "version": "2.0.0",
+  "description": "OAuth-secured MCP server that connects Claude to an Obsidian vault over the Relay sync protocol. Part of The Brody Operating System.",
   "type": "module",
   "scripts": {
     "build": "tsc",

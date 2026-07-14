@@ -1,17 +1,19 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # F8 — Reflection (pass implementation)
 
 **Reference (the why):** `references/anthropic-dreams.md` (inspired by Anthropic Managed Agents Dreams).
-**Applies to:** the curated layer of the vault — discovered via the role registry (Step 1.5). The curated layer is **every role with `layer == "curated"`** (standard or custom — `Building/`, `Garden/`, custom user folders all participate if they were classified curated). The session layer (read as evidence, never written by F8 outputs) is **every role with `layer == "session"`**. Any standard role marked `missing` is silently skipped — its absence is not an F8 failure (it's an F9.0 finding). Custom roles never produce "missing" findings; they're either present or they're not.
+**Applies to:** the curated layer of the vault, discovered through the role registry (Step 1.5). The curated layer is **every role with `layer == "curated"`** (standard or custom: `Building/`, `Garden/`, custom user folders all take part if they were classified curated). The session layer (read as evidence, never written by F8 outputs) is **every role with `layer == "session"`**. Any standard role marked `missing` is skipped without comment. Its absence is not an F8 failure (it is an F9.0 finding). Custom roles never produce "missing" findings. They are either present or they are not.
 
 **Out of scope (never touched by F8 fixes):** CLAUDE.md / claude.md (any folder), SKILL.md, .claude/rules/, files older than the session window in any session-role folder, anything in the technical skip list.
 
-**Path resolution at runtime:** every reference below to "the curated layer" or "the session layer" resolves through `[role.path for role in registry if role.layer == X]`. References to specific layers ("the decisions folder," "the daily folder") look up `[role for role in registry if role.name == Y]` — and if `Y` is missing, the check uses the agent's best alternative within the right layer or skips. Examples in this document use placeholder names like `Context/`, `Building/` for readability — the runtime never assumes literal names.
+**Path resolution at runtime:** every reference below to "the curated layer" or "the session layer" resolves through `[role.path for role in registry if role.layer == X]`. References to specific layers ("the decisions folder," "the daily folder") look up `[role for role in registry if role.name == Y]`. If `Y` is missing, the check uses the agent's best alternative within the right layer or skips. Examples in this document use placeholder names like `Context/`, `Building/` for readability. The runtime never assumes those literal names.
 
 ## How this pass works
 
-Synthesis. Unlike F1–G7, the trigger is not "scan a file with regex." The trigger is "build cross-file clusters, then judge each cluster." Findings emerge from the cluster, not from individual lines.
+Synthesis. Unlike F1–G7, the trigger is not "scan a file with regex." The trigger is "build cross-file clusters, then judge each cluster." Findings come out of the cluster, not out of individual lines.
 
-Every F8 finding ships a concrete fix proposal. F8 fixes are **walk-only** — bulk-apply is unsafe because every contradiction, merge, or promotion needs the user to pick the winning target.
+Every F8 finding ships a concrete fix proposal. F8 fixes are **walk-only**: bulk-apply is unsafe because every contradiction, merge, or promotion needs the user to pick the winning target.
 
 ## Contents
 
@@ -28,15 +30,15 @@ Every F8 finding ships a concrete fix proposal. F8 fixes are **walk-only** — b
 
 ## Setup — windows, clusters, scope
 
-**Session window:** last 30 days, by file mtime or filename date prefix (`YYYY-MM-DD`). Override via `instructions` if user specifies different cadence.
+**Session window:** last 30 days, by file mtime or filename date prefix (`YYYY-MM-DD`). Override via `instructions` if the user sets a different cadence.
 
-**Curated layer set:** every `.md` under every role where `layer == "curated"`. This includes standard curated roles (context, projects, decisions, resources, identity, skills) and custom curated roles the user has (`Building/`, `Garden/`, anything else classified curated in Step 1.5.3).
+**Curated layer set:** every `.md` under every role where `layer == "curated"`. This covers standard curated roles (context, projects, decisions, resources, identity, skills) and any custom curated roles the user has (`Building/`, `Garden/`, anything else classified curated in Step 1.5.3).
 
-**Session set:** every `.md` under every role where `layer == "session"` whose mtime or date prefix falls within the session window. Includes standard session roles (daily, meetings, transcripts) and custom session roles (`Inbox/`, custom capture folders).
+**Session set:** every `.md` under every role where `layer == "session"` whose mtime or date prefix lands inside the session window. Covers standard session roles (daily, meetings, transcripts) and custom session roles (`Inbox/`, custom capture folders).
 
-**Excluded layers:** `archive`, `meta`, `unknown`. Archive content stays archived; meta is tooling/system; unknown roles get a clarification ask via F9.0 before they participate.
+**Excluded layers:** `archive`, `meta`, `unknown`. Archive content stays archived. Meta is tooling and system. Unknown roles get a clarification ask through F9.0 before they take part.
 
-If the role registry has no `identity`/`context` (standard or custom), F8 still runs — but its judgments lose grounding in the user's stated world. Every F8 finding's reasoning must explicitly note when context-grounding is unavailable.
+If the role registry has no `identity`/`context` (standard or custom), F8 still runs, but its judgments lose their grounding in the user's stated world. Every F8 finding's reasoning must call out when that context-grounding is unavailable.
 
 **Topic clusters:** group files by overlap of:
 - shared wikilink targets (≥2 common `[[Target]]` references),
@@ -58,21 +60,21 @@ A cluster is `{file_a, file_b, …, evidence}`. Read each member's first 1500 ch
 - principle inversion (`always X` vs `never X`),
 - date/owner mismatch on the same project.
 
-**Agent judgment:** read both passages with surrounding context. Decide:
-- **Real contradiction** → both files claim to be authoritative, no evolution marker, no scoping difference.
-- **Evolution, not contradiction** → newer file explicitly supersedes older; older file should be marked stale (route to F8.3 instead).
-- **False positive** → the two assertions apply to different scopes, time periods, or audiences. Drop.
+**Agent judgment:** read both passages with the context around them. Decide:
+- **Real contradiction** → both files claim authority, no evolution marker, no scoping difference.
+- **Evolution, not contradiction** → the newer file plainly supersedes the older one. The older file should be marked stale (route to F8.3 instead).
+- **False positive** → the two assertions apply to different scopes, time periods, or audiences. Drop it.
 
-**Fix proposal:** identify the *winner* (newer authoritative source by default; user confirms). Rewrite the loser to either (a) defer to the winner with a wikilink, or (b) remove the contradicted line entirely. If both files are load-bearing, log the resolution in `roles.decisions.path` (or, if decisions role is missing, surface that gap as part of the fix proposal — "no decisions folder discovered; recommend creating one").
+**Fix proposal:** identify the *winner* (the newer authoritative source by default; the user confirms). Rewrite the loser to either (a) defer to the winner with a wikilink, or (b) remove the contradicted line entirely. If both files are load-bearing, log the resolution in `roles.decisions.path` (or, if the decisions role is missing, surface that gap as part of the fix proposal: "no decisions folder discovered; recommend creating one").
 
 **Severity:** fail.
-**Fixable:** true (walk-only). User picks winner per item.
+**Fixable:** true (walk-only). User picks the winner per item.
 
 ---
 
 ## F8.2 — Merge candidates
 
-**Framework rule:** N notes (N ≥ 2) cover substantially the same concept. The vault is fragmented; the curated layer should have one canonical entry.
+**Framework rule:** N notes (N ≥ 2) cover substantially the same concept. The vault is fragmented; the curated layer should hold one canonical entry.
 
 **Trigger heuristic:** clusters where:
 - title similarity ≥ 0.6 (token Jaccard) **and**
@@ -80,34 +82,34 @@ A cluster is `{file_a, file_b, …, evidence}`. Read each member's first 1500 ch
 - combined inbound-link count ≥ 1 (at least one note in the cluster is referenced elsewhere).
 
 **Agent judgment:** read each cluster member's body. Decide:
-- **Merge** → ≥60% content overlap; no member contains a unique sub-topic that justifies separation.
-- **Cross-link, don't merge** → members cover related-but-distinct facets. Route to F2.4 (missing cross-refs) instead.
-- **Keep separate** → members have distinct audiences (e.g., `Context/brand.md` for voice, `Resources/swipe/copy.md` for examples).
+- **Merge** → ≥60% content overlap; no member holds a unique sub-topic that earns its own file.
+- **Cross-link, don't merge** → members cover related but distinct facets. Route to F2.4 (missing cross-refs) instead.
+- **Keep separate** → members serve distinct audiences (say `Context/brand.md` for voice, `Resources/swipe/copy.md` for examples).
 
-**Fix proposal:** pick the canonical target (highest inbound-link count by default; user confirms). Merge unique content from sources into target, redirect every inbound `[[Source]]` wikilink to `[[Target]]`, archive sources to `{roles.archive.path}/{date}-merged/` (or `archive/{date}-merged/` at vault root if the archive role is missing — and surface that gap to F9.0). Never delete — archive preserves the trail.
+**Fix proposal:** pick the canonical target (highest inbound-link count by default; the user confirms). Merge the unique content from the sources into the target, redirect every inbound `[[Source]]` wikilink to `[[Target]]`, and archive the sources to `{roles.archive.path}/{date}-merged/` (or `archive/{date}-merged/` at vault root if the archive role is missing, then surface that gap to F9.0). Never delete. Archiving keeps the trail.
 
-**F5 budget check:** if the merged file would exceed F5's recommended per-file budget (10KB), propose **partial merge** (move only overlapping sections; keep distinct sub-topic files separate) or downgrade to flag-only with reasoning.
+**F5 budget check:** if the merged file would blow past F5's recommended per-file budget (10KB), propose a **partial merge** (move only the overlapping sections; keep the distinct sub-topic files separate) or downgrade to flag-only with reasoning.
 
 **Severity:** warn.
-**Fixable:** true (walk-only). User picks canonical target per cluster.
+**Fixable:** true (walk-only). User picks the canonical target per cluster.
 
 ---
 
 ## F8.3 — Stale entries
 
-**Framework rule:** an entry in the curated layer states an assumption that recent session content has superseded.
+**Framework rule:** an entry in the curated layer states an assumption that recent session content has already overtaken.
 
 **Trigger heuristic:**
 - For each curated-layer file, extract claim sentences (declarative, present-tense, frontmatter-tagged or H2-anchored facts).
-- For each claim, search session set for contradicting or superseding language (decision keywords: `decided`, `pivot`, `now we`, `changed to`, `replaced`, `instead of`).
+- For each claim, search the session set for contradicting or superseding language (decision keywords: `decided`, `pivot`, `now we`, `changed to`, `replaced`, `instead of`).
 - Match by entity overlap (≥2 shared proper nouns or ≥1 shared wikilink target).
 
 **Agent judgment:** read both. Decide:
-- **Stale** → the curated claim is contradicted by a session-layer source the user wrote ≥7 days ago and has not since reverted.
-- **Out of date but still valid** → claim is still operationally true; session is a one-off. Drop.
-- **Active disagreement** → multiple sessions disagree. Route to F8.1 (contradiction) instead.
+- **Stale** → the curated claim is contradicted by a session-layer source the user wrote ≥7 days ago and has not reverted since.
+- **Out of date but still valid** → the claim is still operationally true; the session is a one-off. Drop it.
+- **Active disagreement** → several sessions disagree. Route to F8.1 (contradiction) instead.
 
-**Fix proposal:** rewrite the curated entry with the new state. Quote the superseding source with a wikilink. Move the old wording to a `## History` section if it has decision context, otherwise drop.
+**Fix proposal:** rewrite the curated entry with the new state. Quote the superseding source with a wikilink. Move the old wording to a `## History` section if it carries decision context, otherwise drop it.
 
 **Severity:** fail.
 **Fixable:** true (walk-only). User approves the rewrite per item.
@@ -124,14 +126,14 @@ A cluster is `{file_a, file_b, …, evidence}`. Read each member's first 1500 ch
 - If none exists → candidate.
 
 **Agent judgment:** read the cluster. Decide:
-- **Durable theme** → recurring topic with concrete content; deserves a Context entry or MOC.
-- **One-off chatter** → cluster is incidental (same client mentioned in 3 unrelated meetings). Drop.
-- **Belongs in an existing entry** → the theme overlaps a curated entry the trigger missed. Route to F8.5 (promotion) targeting that entry.
+- **Durable theme** → a recurring topic with concrete content that deserves a Context entry or MOC.
+- **One-off chatter** → the cluster is incidental (the same client mentioned across 3 unrelated meetings). Drop it.
+- **Belongs in an existing entry** → the theme overlaps a curated entry the trigger missed. Route to F8.5 (promotion) aimed at that entry.
 
-**Fix proposal:** create the theme entry in the most appropriate non-missing role: `roles.context.path/{theme-slug}.md` for canonical-knowledge themes, `roles.resources.path/{theme-slug}-MOC.md` for index-style themes. If the right role is missing → propose adopting it as part of the fix (surface to F9.0 simultaneously) before creating the file. Synthesize the cluster's content into a tight entry: 1-line definition, 3–5 key points, wikilinks back to the source notes. Frontmatter follows G7.2 conventions.
+**Fix proposal:** create the theme entry in the most appropriate non-missing role: `roles.context.path/{theme-slug}.md` for canonical-knowledge themes, `roles.resources.path/{theme-slug}-MOC.md` for index-style themes. If the right role is missing → propose adopting it as part of the fix (surface to F9.0 at the same time) before creating the file. Synthesize the cluster's content into a tight entry: 1-line definition, 3–5 key points, wikilinks back to the source notes. Frontmatter follows G7.2 conventions.
 
 **Severity:** warn.
-**Fixable:** true (walk-only). User confirms theme + target path per item.
+**Fixable:** true (walk-only). User confirms the theme plus the target path per item.
 
 ---
 
@@ -139,27 +141,27 @@ A cluster is `{file_a, file_b, …, evidence}`. Read each member's first 1500 ch
 
 **Framework rule:** a specific line or paragraph in an ephemeral session-layer file reads as durable knowledge (decision, principle, learning) that belongs in the curated layer.
 
-**Trigger heuristic:** within session set, scan for marker phrases:
+**Trigger heuristic:** within the session set, scan for marker phrases:
 - decisions: `decided`, `chose`, `going with`, `we'll use`,
 - principles: `always`, `never`, `rule:`, `principle:`,
 - learnings: `learned`, `realized`, `key insight`, `takeaway`,
 - callouts: `> [!note]`, `> [!important]`.
 
-**Agent judgment:** read the surrounding 10–20 lines. Decide:
+**Agent judgment:** read the 10–20 lines around it. Decide:
 - **Promote** → durable, generalizable, not tied to a single moment.
 - **Keep in source** → the insight only makes sense inside the session log it lives in.
-- **Already promoted** → the curated layer already contains this fact. Drop.
+- **Already promoted** → the curated layer already holds this fact. Drop it.
 
-**Fix proposal:** pick the destination from the user's discovered roles — typically `roles.context.path/{x}.md` (durable knowledge), `roles.resources.path/{x}.md` (reusable assets), or `roles.decisions.path/{date}-{slug}.md` (decisions). The agent presents the user with whichever roles exist; missing target roles trigger an F9.0 finding alongside. Append the durable content with a wikilink back to the source. In the source, replace the original lines with a wikilink stub (`See [[Target#section]]`).
+**Fix proposal:** pick the destination from the user's discovered roles: usually `roles.context.path/{x}.md` (durable knowledge), `roles.resources.path/{x}.md` (reusable assets), or `roles.decisions.path/{date}-{slug}.md` (decisions). The agent shows the user whichever roles exist; a missing target role triggers an F9.0 finding alongside. Append the durable content with a wikilink back to the source. In the source, replace the original lines with a wikilink stub (`See [[Target#section]]`).
 
 **Severity:** info.
-**Fixable:** true (walk-only). User picks destination per item.
+**Fixable:** true (walk-only). User picks the destination per item.
 
 ---
 
 ## Cross-framework constraints
 
-These rules prevent F8 from fighting F1–G7. Apply them when emitting findings; downgrade to flag-only when violated.
+These rules keep F8 from fighting F1–G7. Apply them when emitting findings; downgrade to flag-only when one is violated.
 
 | Constraint | Why | What F8 does |
 |---|---|---|
@@ -192,7 +194,7 @@ If any constraint check fails during fix application → abort that finding's fi
   "line": null,
   "severity": "warn",
   "excerpt": "3 notes covering 'B2B positioning' with 72% content overlap; combined inbound links: 4",
-  "reasoning": "These three files all define the B2B positioning thesis; Notes/2026-q1-strategy.md restates Context/strategy.md verbatim in 4 paragraphs; Projects/.../strategy-thoughts.md adds two unique sub-points (vertical-by-vertical breakdown) that should fold into the canonical Context entry. Merging keeps one source of truth without losing the unique material.",
+  "reasoning": "All three files define the same B2B positioning thesis. Notes/2026-q1-strategy.md repeats Context/strategy.md word for word across 4 paragraphs. Projects/.../strategy-thoughts.md adds two unique sub-points (a vertical-by-vertical breakdown) that should fold into the canonical Context entry. Merging keeps one source of truth and holds onto the unique material.",
   "action": "Merge Notes/2026-q1-strategy.md and Projects/.../strategy-thoughts.md into Context/strategy.md (canonical, highest inbound count). Redirect 4 inbound wikilinks. Archive sources to Intelligence/archive/2026-05-08-merged/. Estimated merged size: 7.2KB (under F5 10KB budget).",
   "proposed_target": "./Context/strategy.md",
   "estimated_size_after": 7234,
@@ -206,6 +208,6 @@ The `reasoning` field is mandatory and must explain the cluster's overlap patter
 
 The `cluster` array lists every file in the cluster (for F8.1 and F8.2) or just `[path]` for single-file findings (F8.3, F8.5). For F8.4 the cluster lists the source notes that triggered the theme.
 
-`proposed_target` is the destination path the fix would create or write to. For F8.1 and F8.3 it's the file being rewritten; for F8.2 the canonical merge target; for F8.4 the new file path; for F8.5 the promotion destination.
+`proposed_target` is the destination path the fix would create or write to. For F8.1 and F8.3 it is the file being rewritten; for F8.2 the canonical merge target; for F8.4 the new file path; for F8.5 the promotion destination.
 
 `estimated_size_after` is required for F8.2 (F5 budget gate). Optional elsewhere.

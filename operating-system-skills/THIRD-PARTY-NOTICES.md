@@ -1,13 +1,18 @@
 # Third-Party Notices
 
-Almost everything in this pack — the skills, prompts, templates, and docs — is Brody's work and is covered by `LICENSE`.
+The Brody Operating System is Brody Glanville's original work, covered by `LICENSE`. It uses and references some third-party open-source software, which keeps its own upstream licenses. None of it is sold as Brody's own.
 
-Two folders are third-party **open-source** software, bundled so the skills work out of the box. They keep their own upstream licenses. Brody's license does not apply to them, and they are not sold as Brody's own:
+## `os-mcp` (the MCP server)
 
-1. **Relay fork** — `skills/team-os/reference/brody-relay-fork/`
-   A fork of Relay, a real-time collaboration plugin by System3 (https://system3.md). Drives the team-sharing skill. Subject to Relay's upstream license.
+The server in `skills/os-mcp/reference/` is Brody's own implementation, but it depends on open-source libraries and a third-party protocol:
+- **@modelcontextprotocol/sdk**, the Model Context Protocol SDK.
+- **Express**, **zod**, and related npm packages, pulled at install time from npm under their own licenses.
+- **Relay.md sync protocol / PocketBase**, the server is a client of Relay's HTTP API. Relay is a third-party service/protocol under its own terms.
 
-2. **MCP server** — `skills/os-mcp/reference/relay-mcp-server/`
-   An MCP server that puts the vault behind an always-on endpoint. Drives the deploy/reach-anywhere skill. Subject to its upstream license.
+These are installed as dependencies from their sources; none of their code is claimed here.
 
-If you plan to resell or widely redistribute this pack, check each component's upstream license first. The simplest path is to pull those two from their upstream repos at deploy time rather than shipping them inside a paid product.
+## `team-os` (team sharing)
+
+This skill does **not** bundle any plugin. It tells you to install the upstream **Relay** plugin for Obsidian (by System3, https://system3.md) yourself and configure it. Relay is third-party open source under its own license; it is referenced, not included.
+
+If you plan to resell or widely redistribute this pack, review each dependency's upstream license first.

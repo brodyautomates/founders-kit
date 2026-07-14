@@ -15,6 +15,6 @@ This folder is the library for reusable content: frameworks, templates, prompts,
 ## Rules
 
 - When the user shares reusable content (prompts, frameworks, templates), save it here with a descriptive filename.
-- Organize with light nesting. Use the existing subfolders above; create new ones only when there's clear category warrant.
+- Keep the nesting light. Use the subfolders above; add new ones only when a category clearly warrants it.
 - Use `[[wikilinks]]` to reference resources from project notes or daily notes.
 - Don't duplicate content that already lives in a project folder. Link to it instead.

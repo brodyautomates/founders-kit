@@ -1,11 +1,13 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # F2 — Karpathy LLM Wiki (pass implementation)
 
 **Reference (the why):** `references/karpathy-llm-wiki.md`.
-**Applies to:** the wiki content layer — every file classified as `note`, `context`, `decision`, `meeting`, `index`, `readme`. F2.6 also runs against `root-claude` (schema doc check).
+**Applies to:** the wiki content layer, meaning every file classified as `note`, `context`, `decision`, `meeting`, `index`, `readme`. F2.6 also runs against `root-claude` (schema doc check).
 
 ## How this pass works
 
-Agentic. Each check pairs a **trigger heuristic** (cheap candidate-surfacing) with **agent judgment** (read context, reason, decide). Findings include `reasoning` specific to the case. See F1's intro for the full pattern.
+Agentic. Each check pairs a **trigger heuristic** (a cheap way to surface candidates) with **agent judgment** (read the context, reason, decide). Findings carry `reasoning` written for the specific case. See F1's intro for the full pattern.
 
 Build the indexes from SKILL.md Step 1.3 once before running F2 (filename index, inbound-link index, routing table).
 
@@ -26,16 +28,16 @@ Build the indexes from SKILL.md Step 1.3 once before running F2 (filename index,
 
 ## F2.1 — Schema doc completeness
 
-**Framework rule:** the schema doc (root CLAUDE.md) defines folder layout, naming, page types, cross-reference rules, ingest/query/lint workflows, frontmatter. Without it, the wiki drifts into folders nobody can find.
+**Framework rule:** the schema doc (root CLAUDE.md) sets the folder layout, naming, page types, cross-reference rules, ingest/query/lint workflows, and frontmatter. Without it the wiki drifts into folders nobody can find again.
 
-**Trigger heuristic:** read root CLAUDE.md. Score for the seven schema components by section heading + body content (not just heading match — heading without body content doesn't count).
+**Trigger heuristic:** read root CLAUDE.md. Score for the seven schema components by section heading + body content (not just heading match; a heading without body content doesn't count).
 
 **Agent judgment:**
-- For each missing component, decide whether it's actually missing or whether the project handles it differently (e.g., naming conventions documented in a separate `Resources/conventions.md` and linked from CLAUDE.md → still counts).
-- Reasoning explains *which* components are weak and what the consequence is for users running ingest/query workflows.
+- For each missing component, decide whether it is truly absent or whether the project handles it another way. A naming convention documented in a separate `Resources/conventions.md` and linked from CLAUDE.md still counts.
+- Reasoning names *which* components are weak and what that costs users who run the ingest/query workflows.
 
 **False positives to skip:**
-- Tiny vaults (<20 files) where formal schema is overkill — flag with lower severity, recommend lightweight schema.
+- Tiny vaults (<20 files) where a formal schema is overkill → flag at lower severity, recommend a lightweight schema.
 
 **Severity:** fail if <4 components present, warn if 4–6.
 
@@ -53,16 +55,16 @@ Citation: karpathy-llm-wiki.md → Schema doc structure
 
 ## F2.2 — Dead wikilinks
 
-**Framework rule:** dead links are lint failures.
+**Framework rule:** a dead link is a lint failure.
 
 **Trigger heuristic:** for every `[[target]]` (regex `\[\[([^\]|#]+)(?:\|[^\]]+)?\]\]`), strip section anchors and aliases, lookup in `vault_filename_index`. If absent → candidate.
 
 **Agent judgment:** for each dead candidate:
-- Read the surrounding line. Is the link a real reference, or is it inside a code fence demonstrating wikilink syntax? Skip syntax demos.
-- Compute top-3 closest filenames by Levenshtein.
-- Read the candidate target files briefly. Pick the best repoint by reasoning about what the link's surrounding line means.
-- If no good repoint exists → recommend "remove link, keep text".
-- Reasoning: why this specific repoint vs the others.
+- Read the line around it. Is the link a real reference, or is it inside a code fence showing off wikilink syntax? Skip the syntax demos.
+- Compute the top-3 closest filenames by Levenshtein.
+- Read the candidate target files briefly. Pick the best repoint by reasoning about what the surrounding line actually means.
+- If nothing repoints well → recommend "remove link, keep text".
+- Reasoning: why this repoint over the others.
 
 **False positives to skip:**
 - Wikilinks inside code fences or inline code (syntax demonstrations).
@@ -91,11 +93,11 @@ Citation: karpathy-llm-wiki.md → Lint catches dead links
 **Trigger heuristic:** files where `inbound_link_index[file] == 0`.
 
 **Agent judgment:** for each orphan candidate:
-- Is it intentional? (Date-indexed daily, profile root, archive, transcripts.) The pass file lists known intentional-orphan patterns; agent confirms by reading the file's role and content.
-- If genuinely unreachable, what should happen? Options:
-  - Link from a parent/index note (which one?)
-  - Move to archive (is the content stale?)
-  - Delete (is the content redundant?)
+- Is it orphaned on purpose? (Date-indexed daily, profile root, archive, transcripts.) The pass file lists the known intentional-orphan patterns. The agent confirms by reading the file's role and content.
+- If it really is unreachable, what should happen? Options:
+  - Link it from a parent/index note (which one?)
+  - Move it to archive (is the content stale?)
+  - Delete it (is the content redundant?)
 - Reasoning picks the right action by reading the file's content.
 
 **Intentional orphans** (skipped from findings):
@@ -119,21 +121,21 @@ Action: {specific recommendation: "link from {index file}", "move to archive", o
 
 ## F2.4 — Missing cross-references
 
-**Framework rule:** entity name appears as plain text but a file with that name exists → should be a `[[wikilink]]`.
+**Framework rule:** an entity name shows up as plain text while a file with that name exists → it should be a `[[wikilink]]`.
 
 **Trigger heuristic:** for each entity-shaped filename (multiword, PascalCase, or with capitals; skip generics like `notes`, `index`, `readme`), search the vault for plain-text occurrences NOT inside `[[...]]`, `[...](...)`, code fences, or inline code.
 
 **Agent judgment:** for each plain-text occurrence:
-- Read the full sentence. Is the name being used as the entity (refers to the wiki page) or in passing/quoted speech?
+- Read the full sentence. Is the name used as the entity (pointing at the wiki page) or just in passing or in quoted speech?
 - "Stripe" in "Set up Stripe webhook" → entity reference, link it.
-- "Stripe" in "We're not using Stripe anymore" → still entity reference, link it.
-- "Stripe" inside a quoted message from a user — judgment call; if the quote is talking about the same Stripe entity, link it; if it's just word-coincidence, skip.
-- Reasoning explains why this specific occurrence should/shouldn't be linked.
+- "Stripe" in "We're not using Stripe anymore" → still an entity reference, link it.
+- "Stripe" inside a quoted message from a user → judgment call. If the quote is about the same Stripe entity, link it. If it is word-coincidence, skip.
+- Reasoning states why this exact occurrence should or should not be linked.
 
 **False positives to skip:**
-- Headings (the heading itself usually shouldn't be a wikilink).
+- Headings (the heading itself usually should not be a wikilink).
 - Frontmatter values.
-- The file that IS the entity's page (don't link a file to itself).
+- The file that IS the entity's page (do not link a file to itself).
 - Generic word matches (skip filenames < 4 chars, skip ambiguous single words).
 
 **Severity:** warn.
@@ -147,21 +149,21 @@ Action: convert to [[{name}]]
 Citation: karpathy-llm-wiki.md → Missing cross-references
 ```
 
-**Auto-fix:** **fixable on user opt-in** — per-occurrence (don't bulk-replace; some occurrences are intentional plain text).
+**Auto-fix:** **fixable on user opt-in**, per-occurrence (don't bulk-replace; some occurrences are intentional plain text).
 
 ---
 
 ## F2.5 — Same-role duplicates
 
-**Framework rule:** two pages claiming to be the canonical record for the same entity is a lint failure.
+**Framework rule:** two pages both claiming to be the canonical record for one entity is a lint failure.
 
 **Trigger heuristic:** filename clusters in `Context/` (voice/brand/tone, icp/customer-profile/audience, services/offers/products, me/profile/operator, strategy/goals/okrs, team/org). Plus pairs in any folder where Levenshtein ≤3 between basenames.
 
 **Agent judgment:** for each candidate pair, **read both files**.
-- Do they actually overlap, or do they cover different aspects (e.g., `voice.md` = how we sound, `brand.md` = visual identity + voice + values)?
-- Identify which sections overlap. Reasoning cites overlapping sections by heading.
-- If they're complementary → recommend differentiation by frontmatter scope or rename to disambiguate.
-- If they overlap → recommend consolidation; pick the canonical filename by reasoning about which name is more conventional / more linked.
+- Do they actually overlap, or do they cover different angles? For example `voice.md` = how we sound, `brand.md` = visual identity plus voice plus values.
+- Find which sections overlap. Reasoning cites the overlapping sections by heading.
+- If they complement each other → recommend differentiating by frontmatter scope or renaming to disambiguate.
+- If they overlap → recommend consolidation. Pick the canonical filename by reasoning about which name is more conventional and more linked.
 
 **False positives to skip:**
 - Files where one is a current draft and the other is archived (read frontmatter `status:`).
@@ -184,7 +186,7 @@ Action: {specific: "consolidate into {chosen-canonical}.md" OR "differentiate by
 
 ## F2.6 — Schema non-compliance (routing)
 
-**Framework rule:** schema doc defines folder routing; non-compliant files are lint failures.
+**Framework rule:** the schema doc sets the folder routing. Files that break it are lint failures.
 
 **Trigger heuristic:**
 1. Read root CLAUDE.md, extract routing/knowledge-routing table.
@@ -193,13 +195,13 @@ Action: {specific: "consolidate into {chosen-canonical}.md" OR "differentiate by
 4. Top-level folders not in routing table → candidate.
 
 **Agent judgment:**
-- For each vault-root file: read it. Decide whether it's misplaced (move where?) or legitimate (rare; recommend adding to allowed exceptions list).
+- For each vault-root file: read it. Decide whether it is misplaced (move it where?) or legitimate (rare; recommend adding it to the allowed exceptions list).
 - For each unmapped folder: read its content. Decide whether to expand the routing table or relocate the folder's contents.
-- Reasoning explains the right destination for each non-compliant item.
+- Reasoning names the right destination for each non-compliant item.
 
 **False positives to skip:**
-- `LICENSE.md`, `CHANGELOG.md`, `CONTRIBUTING.md` — conventional repo-root files.
-- `.github/`, `.vscode/`, `.cursor/`, `.claude/` — tooling folders.
+- `LICENSE.md`, `CHANGELOG.md`, `CONTRIBUTING.md`: conventional repo-root files.
+- `.github/`, `.vscode/`, `.cursor/`, `.claude/`: tooling folders.
 
 **Severity:**
 - vault-root file violation → fail
@@ -240,9 +242,9 @@ Action: add a routing table that maps every top-level folder to a content type
 - Body matches: just an H1, just frontmatter, or only `TODO`, `WIP`, `Coming soon`, `Placeholder`, `Lorem ipsum`, `Draft`, `xxx`.
 
 **Agent judgment:**
-- For each candidate, read the file. Is it intentionally a one-line index (e.g., `Resources/quick-links.md` with three bullets)? → not a stub.
-- Is it a true stub — file created but never filled in? → flag.
-- Reasoning judges whether the file is salvageable (fill in), redundant (delete), or in-progress (move to drafts/).
+- For each candidate, read the file. Is it a one-line index on purpose (say `Resources/quick-links.md` with three bullets)? → not a stub.
+- Is it a real stub, a file created but never filled in? → flag.
+- Reasoning judges whether the file is salvageable (fill it in), redundant (delete), or in-progress (move to drafts/).
 
 **False positives to skip:**
 - Onboarding/templates/ files (templates by design).
@@ -265,7 +267,7 @@ Action: {specific: "fill in: {what's missing}" OR "delete (redundant with {other
 
 ## F2.8 — Undigested sources
 
-**Framework rule:** one ingest typically touches 10–15 wiki pages. A source producing only one summary file was not fully digested.
+**Framework rule:** one ingest usually touches 10–15 wiki pages. A source that produced only a single summary file was not fully digested.
 
 **Trigger heuristic:** for `meeting` and `transcript` files:
 1. Extract the source's date.
@@ -273,15 +275,15 @@ Action: {specific: "fill in: {what's missing}" OR "delete (redundant with {other
 3. Count distinct files modified outside the source's own folder. <3 → candidate.
 
 **Agent judgment:** for each candidate:
-- Read the source file. What entities, projects, decisions does it mention?
-- Check whether those entity/project files exist in the vault and were updated near the source's date.
-- If the source is short/unimportant (e.g., a 5-min call) → may be OK with low fan-out. Skip.
-- If the source is substantive but no downstream activity → flag with reasoning listing missed propagations.
+- Read the source file. What entities, projects, and decisions does it mention?
+- Check whether those entity/project files exist in the vault and got updated near the source's date.
+- If the source is short or minor, like a 5-min call → low fan-out is fine. Skip.
+- If the source is substantive but nothing downstream moved → flag with reasoning that lists the missed propagations.
 
 **False positives to skip:**
 - Source files explicitly marked `processed: true` in frontmatter.
 - Trivial sources (very short transcripts).
-- Vaults without git history (skip; agent has no signal).
+- Vaults without git history (skip; the agent has no signal).
 
 **Severity:** warn.
 
@@ -304,8 +306,8 @@ Citation: karpathy-llm-wiki.md → 10–15 page fan-out
 **Trigger heuristic:** detect raw-source folders (`Raw/`, `Sources/`, `sources/`, `raw-sources/`, `inputs/`). Check git log for non-human commit authors.
 
 **Agent judgment:** for each modified raw source:
-- Read the git diff. Is the change content (LLM rewrote the source) or metadata (LLM added frontmatter)? Both are violations, but reasoning differs.
-- Reasoning describes what was modified and why it matters.
+- Read the git diff. Was the change content (the LLM rewrote the source) or metadata (the LLM added frontmatter)? Both break the rule, but the reasoning differs.
+- Reasoning describes what got modified and why it matters.
 
 **False positives to skip:**
 - Vaults without git → skip silently.
@@ -326,4 +328,4 @@ Action: revert; raw sources are immutable canon
 
 ## Finding schema
 
-Same shape as F1 — every finding has `reasoning`. See SKILL.md Step 2.4.
+Same shape as F1. Every finding carries a `reasoning` field. See SKILL.md Step 2.4.

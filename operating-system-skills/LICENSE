@@ -1,20 +1,20 @@
-Copyright © 2026 Brody. All rights reserved.
+Copyright © 2026 Brody Glanville. All rights reserved.
 
-The Brody Operating System skill pack — its structure, instructions, prompts,
-templates, and documentation — is the original work of Brody. It is licensed,
-not sold.
+The Brody Operating System, its skills, prompts, templates, instructions,
+documentation, and the server implementation in the os-mcp skill, is the
+original work of Brody Glanville. It is licensed, not sold.
 
 You may:
-  - Use these skills to run your own business.
-  - Adapt them for your own internal use.
+  - Use it to run your own business.
+  - Adapt it for your own internal use.
 
 You may not:
   - Resell, sublicense, or redistribute this pack, in whole or in part,
-    without written permission from Brody.
+    without written permission from Brody Glanville.
   - Remove this notice.
 
-Third-party software: some skills deploy or orchestrate open-source software
-(for example an MCP server or a team-sharing backend). That software is NOT part
-of this pack and is NOT covered by this license; it remains under its own
-upstream license. This pack only tells your agent how to stand up and drive
-those tools — it does not include or relicense their code.
+Dependencies and referenced tools: some skills build on, or tell you to
+install, third-party open-source software (for example the Model Context
+Protocol SDK, Express, and the Relay plugin for Obsidian). That software is
+NOT part of this pack and stays under its own upstream license. See
+THIRD-PARTY-NOTICES.md.

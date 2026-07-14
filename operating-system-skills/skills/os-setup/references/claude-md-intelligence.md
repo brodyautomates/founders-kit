@@ -19,11 +19,11 @@ This folder holds organizational knowledge: meetings, competitors, market intel,
 
 ## Decision Records
 
-Every decision record should include the *why* with specific context: who was involved, what tension prompted it, what trade-off was made. Use `> [!important]` for the core decision statement and `> [!warning]` for known risks or trade-offs.
+Every decision record should carry the *why* with real context: who was involved, what tension prompted it, what trade-off got made. Use `> [!important]` for the core decision statement and `> [!warning]` for known risks or trade-offs.
 
 ## Competitor Profiles
 
-Use `> [!important]` for strategic implications and `> [!tip]` for opportunities identified.
+Use `> [!important]` for strategic implications and `> [!tip]` for opportunities you spot.
 
 ## Rules
 

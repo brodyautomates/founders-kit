@@ -1,13 +1,15 @@
+<!-- © 2026 Brody Glanville. All rights reserved. The Brody Operating System. -->
+
 # F4 — Chroma Context Rot (pass implementation)
 
 **Reference (the why):** `references/chroma-context-rot.md`.
-**Applies to:** every `.md`. Position checks (F4.3, F4.4) prioritize files that load early. Distractor checks (F4.5) operate on auto-load and same-folder pairs.
+**Applies to:** every `.md`. The position checks (F4.3, F4.4) put files that load early at the front of the queue. The distractor check (F4.5) works on auto-load files and same-folder pairs.
 
 ## How this pass works
 
-Agentic. Length and position are mostly mechanical, but **what counts as a problem depends on the file's role and content**. A 200KB transcript is fine; a 200KB CLAUDE.md is a disaster. Lead-in preamble in a daily journal is normal; in a routing index it's a buried-rule problem. The agent reads each candidate and produces reasoning that distinguishes the two.
+Agentic. Length and position measure out mechanically, but **whether a number is a problem depends on the file's job and what is inside it**. A 200KB transcript is expected. A 200KB CLAUDE.md is a wreck. A warm-up paragraph in a daily journal reads as normal. The same paragraph in a routing index means a rule got buried. The agent reads each candidate and writes reasoning that tells those two cases apart.
 
-See F1's intro for the full trigger → judgment → reasoning pattern.
+Look at F1's intro for the full trigger, then judgment, then reasoning pattern.
 
 ## Contents
 
@@ -24,14 +26,14 @@ See F1's intro for the full trigger → judgment → reasoning pattern.
 
 ## F4.1 — File length distribution
 
-**Framework rule:** longer files degrade more; outliers act as collective distractors.
+**Framework rule:** longer files degrade more, and the outliers pull attention away from everything else like distractors.
 
 **Trigger heuristic:** compute project-median byte size. Files > median × 5 → candidate.
 
 **Agent judgment:** for each candidate, read the file (or skim if huge):
-- Is it intentionally long (transcripts, reference docs, course content)? → may be acceptable; still flag if it's loaded into auto-context.
-- Is it bloated (multiple unrelated topics in one file)? → strong flag; recommend split with specific section breakpoints.
-- Reasoning describes the file's structure and either confirms it should split or explains why it's legitimately long.
+- Is it long on purpose (transcripts, reference docs, course content)? → it may be fine. Still flag it if it gets pulled into auto-context.
+- Is it bloated because several unrelated topics share one file? → strong flag. Recommend a split with specific section breakpoints.
+- Reasoning describes the file's structure and either backs a split or states why the length is legitimate.
 
 **False positives to skip:**
 - Files inside `*transcript*/`, `*archive*/` where length is expected.
@@ -53,17 +55,17 @@ Action: {specific: "split at {section breakpoints}" OR "leave as-is — legitima
 
 ## F4.2 — Loaded-context-size budget
 
-**Framework rule:** auto-load context is a finite attention budget; soft target ~3K tokens.
+**Framework rule:** auto-load context is a fixed attention budget. Soft target sits around 3K tokens.
 
-**Trigger heuristic:** sum bytes of root CLAUDE.md (the only auto-load file per Anthropic rule 13 — folder CLAUDE.mds load on demand). Tokens ≈ bytes/4. Compare to 3,000 token budget.
+**Trigger heuristic:** sum bytes of root CLAUDE.md (the only auto-load file per Anthropic rule 13; folder CLAUDE.mds load on demand). Tokens ≈ bytes/4. Compare to 3,000 token budget.
 
-**Agent judgment:** if over budget, read the root CLAUDE.md and identify:
-- Which sections are pure noise (could move to references/, .claude/rules/, or skills)?
-- Which sections are load-bearing for every session vs niche?
-- Reasoning names specific section headings that should move and where to.
+**Agent judgment:** if the file is over budget, read the root CLAUDE.md and work out:
+- Which sections are just noise (they could move to references/, .claude/rules/, or skills)?
+- Which sections earn their place in every session, and which are niche?
+- Reasoning names the exact section headings that should move and where they go.
 
 **False positives to skip:**
-- Vaults where the user has explicitly opted into a heavy auto-load (rare; ask if there's a stated preference).
+- Vaults where the user has deliberately chosen a heavy auto-load (rare; ask if there is a stated preference).
 
 **Severity:**
 - > 6,000 tokens → fail
@@ -83,18 +85,18 @@ Citation: chroma-context-rot.md → Loaded context size
 
 ## F4.3 — Critical-info position
 
-**Framework rule:** unique words placed early have higher accuracy. Buried rules get neglected.
+**Framework rule:** unique words placed early get read with higher accuracy. Rules buried deep get skipped.
 
 **Trigger heuristic:** for `root-claude`, `folder-claude`, `index`, `readme`, scan all lines and tag any that look load-bearing (imperatives at line start, routing-table rows, callouts, `IMPORTANT:` markers). For each load-bearing line past the 30% mark → candidate.
 
 **Agent judgment:** read the file structure:
-- Is the buried rule actually critical? (Some imperatives like "Save the report" are operational but not high-stakes.) Don't over-flag.
-- Is the file long enough that "30%" is a meaningful threshold? In a 50-line file, line 20 isn't really "buried."
-- Reasoning names the specific buried rule and what's currently occupying the top instead.
+- Is the buried rule genuinely critical? Some imperatives like "Save the report" are operational but low-stakes. Do not over-flag.
+- Is the file even long enough for "30%" to mean anything? In a 50-line file, line 20 is not really buried.
+- Reasoning names the specific buried rule and states what is sitting at the top in its place.
 
 **False positives to skip:**
-- Files where the top is intentionally a frontmatter + summary callout, with rules immediately below.
-- Files <30 lines where position matters less.
+- Files where the top is deliberately a frontmatter plus summary callout, with the rules right below it.
+- Files <30 lines where position carries less weight.
 
 **Severity:** warn.
 
@@ -113,7 +115,7 @@ Action: move {specific rules} to the top; demote {currently-top section} below
 
 ## F4.4 — Lead-in preamble
 
-**Framework rule:** lead with the rule, not the rationale.
+**Framework rule:** open with the rule, save the rationale for after.
 
 **Trigger heuristic:** read first 30 lines (excluding frontmatter and H1). Detect preamble patterns:
 ```
@@ -122,12 +124,12 @@ Action: move {specific rules} to the top; demote {currently-top section} below
 If present and no imperative/routing table appears before line 20 → candidate.
 
 **Agent judgment:** read the top 30 lines.
-- Is the preamble setting necessary context (e.g., naming the file's scope)? → may be OK with low severity.
+- Is the preamble setting up needed context, like naming the file's scope? → it may be fine at low severity.
 - Is the preamble pure throat-clearing? → flag.
-- Reasoning explains what the preamble currently says and what should replace it.
+- Reasoning states what the preamble currently says and what should sit there instead.
 
 **False positives to skip:**
-- Files where preamble is a one-line scope summary followed immediately by load-bearing content.
+- Files where the preamble is a one-line scope summary followed straight away by load-bearing content.
 
 **Severity:** warn.
 
@@ -145,18 +147,18 @@ Action: lead with {specific lower section}; move preamble below or delete
 
 ## F4.5 — Distractor density / similar-topic pairs
 
-**Framework rule:** similar files in the same load path distract each other ("shuffled > structured" finding).
+**Framework rule:** similar files in the same load path distract each other (the "shuffled > structured" finding).
 
 **Trigger heuristic:** for pairs of files in the same folder where Levenshtein ≤4 between basenames AND vocabulary Jaccard >0.4 (after stopword removal, drop protected zones).
 
 **Agent judgment:** for each candidate pair, read both files briefly:
-- Do they actually overlap topically, or do they share generic vocabulary because they're both notes?
-- If they always load together (e.g., both are referenced from the same CLAUDE.md), the distractor effect is real → flag with reasoning.
-- If they're loaded independently (different routing paths), the distractor risk is lower → flag with lower severity or skip.
+- Do they truly overlap on topic, or do they just share generic vocabulary because they are both notes?
+- If they always load together (say both are referenced from the same CLAUDE.md), the distractor effect is real → flag with reasoning.
+- If they load on their own through different routing paths, the distractor risk is lower → flag at lower severity or skip.
 
 **False positives to skip:**
-- Pairs where one is clearly an index of the other.
-- Pairs explicitly differentiated by frontmatter scope.
+- Pairs where one file is clearly an index of the other.
+- Pairs already separated by frontmatter scope.
 
 **Severity:** warn.
 
@@ -175,16 +177,16 @@ Action: consolidate, differentiate vocabulary explicitly, or split load paths (m
 
 ## F4.6 — Top-of-file callout
 
-**Framework rule:** critical decisions benefit from a `> [!type]` callout near the top.
+**Framework rule:** critical decisions read better with a `> [!type]` callout near the top.
 
 **Trigger heuristic:** for files classified as `decision` OR containing `decision`/`rule`/`policy` in H1 or frontmatter, check first 30 lines for `^>\s*\[!(important|warning|note|info|tip|caution)\]`.
 
-**Agent judgment:** for each candidate without a callout:
-- Read the file. Identify the load-bearing claim — is there a single sentence that captures the decision/rule?
-- Reasoning supplies that sentence as a suggested callout body.
+**Agent judgment:** for each candidate that has no callout:
+- Read the file. Find the load-bearing claim. Is there one sentence that captures the decision or rule?
+- Reasoning gives that sentence as a suggested callout body.
 
 **False positives to skip:**
-- Files that already lead with an H1 + a one-sentence summary (functionally a callout without the syntax).
+- Files that already open with an H1 plus a one-sentence summary. That works as a callout without the syntax.
 
 **Severity:** warn.
 
@@ -201,16 +203,16 @@ Action: add `> [!important]\n> {summary}` at the top
 
 ## F4.7 — Daily file size
 
-**Framework rule:** focused 300-token prompts beat full 113K contexts; daily bloat is a known anti-pattern.
+**Framework rule:** a focused 300-token prompt beats a full 113K context. Daily bloat is a known anti-pattern.
 
 **Trigger heuristic:** every `daily` file. Tokens ≈ bytes/4. Soft budget 2,000 tokens.
 
 **Agent judgment:** for each candidate over budget, read the file:
-- What's bloating it? Pasted conversation history? Long meeting transcripts? Action items that should be elsewhere?
-- Reasoning names the bloat source and recommends where it belongs.
+- What is bloating it? Pasted conversation history? Long meeting transcripts? Action items that belong somewhere else?
+- Reasoning names the bloat source and points to where it should live.
 
 **False positives to skip:**
-- Daily entries that capture a single substantive event (e.g., a major decision recorded in detail) — flag with low severity.
+- Daily entries that record one substantial event, like a major decision written up in detail. Flag at low severity.
 
 **Severity:**
 - > 4,000 tokens → fail
@@ -229,4 +231,4 @@ Action: extract {specific content type} to {specific destination} (e.g., decisio
 
 ## Finding schema
 
-Same shape as F1 — every finding has `reasoning`. See SKILL.md Step 2.4.
+Same shape as F1. Every finding carries a `reasoning` field. See SKILL.md Step 2.4.

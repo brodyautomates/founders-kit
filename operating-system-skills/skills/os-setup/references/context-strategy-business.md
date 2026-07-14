@@ -45,7 +45,7 @@ last_reviewed: [YYYY-MM-DD]
 
 ## Quarterly Focus
 
-Current quarter priorities:
+This quarter's priorities:
 
 | Priority | Why | Owner | Key Result | Status |
 |----------|-----|-------|------------|--------|
@@ -59,6 +59,6 @@ Current quarter priorities:
 ---
 
 > [!tip] Review Cadence
-> - **Weekly**: OKR progress check during weekly review
+> - **Weekly**: OKR progress check during the weekly review
 > - **Monthly**: Department goal check, revenue tracking
 > - **Quarterly**: Full OKR scoring, objective setting for next quarter
