@@ -1,22 +1,20 @@
 # Founder Kit
 
-Everything from the talk, in one place. Four resources to stand up your own AI operating system and content engine.
+The operating-system skill pack from the talk. Install it into your AI agent (Claude Code) and run `/os-setup` to stand up your own AI operating system.
 
-## What's inside
+## What's here
 
-1. **`operating-system-skills/`** — the operating-system skill pack. Five installable skills (plain-text instruction files your AI agent loads) that stand up the whole system from an empty folder: set it up, run it on a schedule, keep it clean as it grows, share it across a team with permissions, and reach it from anywhere.
-2. **`voice-setup/`** — a skill file that reads your existing posts, captures how you actually write, and applies that voice to everything the system drafts. Keeps learning from every post you approve.
-3. **`content-tracker/`** — an automation (a scheduled workflow) that pulls your best-performing content into one sheet every day and hands it to an AI to break down what's working.
-4. **`company-brain/`** — the open-source base for a context layer: a self-hosted repo that ingests everything you feed it and answers questions across it with sources.
+- **`operating-system-skills/`** — five skills that build and run an AI "operating system":
+  - `os-setup` — stand up the vault from an empty folder.
+  - `os-operator` — keep it current on a schedule.
+  - `os-optimizer` — audit and tune it.
+  - `team-os` — share it across a team with roles.
+  - `os-mcp` — put it online behind an MCP server.
 
-## How to use it
+## What "operating system" means here
 
-Start with `operating-system-skills/`. Read its top-level notes, install the skills into your agent (Claude Code or any harness that loads skill files), and run `os-setup` first. Layer in the voice setup and content tracker once the base is running.
+It is not a computer OS. It is the system your business runs on: one folder of context your AI reads from and writes to, plus the skills that build and operate it. You install the skills, run `os-setup`, and you get a working vault. The skills are the installable part; running them creates the "OS."
 
-## Licensing
+## License
 
-The operating-system skill pack and the voice setup are **original work, © 2026 Brody, all rights reserved** — licensed to you for use, not for resale (see `operating-system-skills/LICENSE`). Where a skill deploys an open-source tool (an MCP server, a team-sharing backend), that tool stays under its own upstream license; the pack drives it, it doesn't include it.
-
-The company brain is **third-party open source** — use its upstream repo directly and follow its license; don't re-host it as your own.
-
-Built by Brody / Merydian. Questions: merydian.ai
+© 2026 Brody Glanville. All rights reserved. Licensed, not sold. See `operating-system-skills/LICENSE` and `operating-system-skills/THIRD-PARTY-NOTICES.md`.
